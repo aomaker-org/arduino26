@@ -95,4 +95,18 @@ workflows, and repository hygiene for all assistants operating within the
   All code, tools, and documentation are licensed under permissive FOSS licenses
   (MIT, Apache 2.0, Unlicense / CC0).
 
+---
+
+## 7. Script Management & Snippets Toolbox Directives (`tools/*`)
+
+- **Script Placement Standard:** Whenever AGY or any AI assistant creates a helper
+  script, utility, or shell automation, it MUST be saved under `tools/*` with proper
+  execution permissions (`chmod +x`).
+- **Mandatory Documentation & Snippets Toolbox:** Every script added to `tools/*`
+  MUST be documented in `docs/snippets_toolbox.md`.
+- **Attribution & Provenance:** If a script or code block is derived from or relates to
+  external web resources (e.g. `usbipd-win`, `arduino-cli`, `pySerial`, Adafruit
+  libraries, or datasheets), explicit attribution and reference URLs MUST be included in
+  both the script header comments and `docs/snippets_toolbox.md`.
+
 <!-- file AI.md ends -->
