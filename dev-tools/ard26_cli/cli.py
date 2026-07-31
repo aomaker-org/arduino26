@@ -13,6 +13,7 @@ import shutil
 
 from ard26_cli.config import Config
 from ard26_cli.detector import DeviceDetector
+from ard26_cli.logger import OperationLogger
 
 try:
     import serial
@@ -54,6 +55,7 @@ def resolve_sketch_path(sketch_arg: str, root_dir: Path) -> Path:
 
 def cmd_compile(args, cfg: Config):
     """Executes sketch compilation via arduino-cli."""
+    logger = OperationLogger(cfg.root_dir)
     sketch_path = resolve_sketch_path(args.sketch or cfg.last_compiled_sketch, cfg.root_dir)
     fqbn = args.fqbn or cfg.fqbn
     cli_bin = find_arduino_cli()
@@ -61,6 +63,7 @@ def cmd_compile(args, cfg: Config):
     if not cli_bin:
         print("[!] 'arduino-cli' not found in PATH or ~/.local/bin.", file=sys.stderr)
         print("[!] To install required utilities, run: ./dev-tools/provision_environment.sh", file=sys.stderr)
+        logger.log_operation("compile", sketch_path.name, "N/A", "FAILED", 1)
         sys.exit(1)
     
     print(f"[*] Compiling sketch : {sketch_path}")
@@ -72,14 +75,17 @@ def cmd_compile(args, cfg: Config):
     if res.returncode == 0:
         print("[SUCCESS] Compilation completed successfully.")
         cfg.set_last_compiled_sketch(sketch_path.name)
+        logger.log_operation("compile", sketch_path.name, "N/A", "SUCCESS", 0)
         print(f"[*] Default upload sketch locked -> [{sketch_path.name}]")
     else:
         print(f"[X] Compilation failed with exit code {res.returncode}.", file=sys.stderr)
+        logger.log_operation("compile", sketch_path.name, "N/A", "FAILED", res.returncode)
         sys.exit(res.returncode)
 
 
 def cmd_upload(args, cfg: Config):
     """Executes sketch compilation and flashing to serial port."""
+    logger = OperationLogger(cfg.root_dir)
     if not args.sketch:
         target_name = cfg.last_compiled_sketch
         if sys.stdin.isatty():
@@ -87,9 +93,11 @@ def cmd_upload(args, cfg: Config):
                 ans = input(f"Upload the last compiled sketch [{target_name}]? [Y/n] ").strip()
                 if ans and not ans.lower().startswith('y'):
                     print("[!] Upload canceled.")
+                    logger.log_operation("upload", target_name, "N/A", "CANCELED", 0)
                     return
             except (KeyboardInterrupt, EOFError):
                 print("\n[!] Upload canceled.")
+                logger.log_operation("upload", target_name, "N/A", "CANCELED", 0)
                 return
         sketch_arg = target_name
     else:
@@ -97,7 +105,7 @@ def cmd_upload(args, cfg: Config):
 
     sketch_path = resolve_sketch_path(sketch_arg, cfg.root_dir)
     fqbn = args.fqbn or cfg.fqbn
-    port = DeviceDetector.resolve_port(args.port, cfg.port_wsl)
+    port = DeviceDetector.resolve_port(args.port or cfg.preferred_port, cfg.port_wsl)
     cli_bin = find_arduino_cli()
 
     print(f"[*] Uploading sketch : {sketch_path}")
@@ -107,6 +115,7 @@ def cmd_upload(args, cfg: Config):
     if not cli_bin:
         print("[!] 'arduino-cli' not found in PATH or ~/.local/bin.", file=sys.stderr)
         print("[!] To install required utilities, run: ./dev-tools/provision_environment.sh", file=sys.stderr)
+        logger.log_operation("upload", sketch_path.name, port, "FAILED", 1)
         sys.exit(1)
 
     # Convert sketch path to Windows UNC path if needed
@@ -128,6 +137,8 @@ def cmd_upload(args, cfg: Config):
         res = subprocess.run(ps_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
         if res.returncode == 0:
             print(f"[SUCCESS] Upload to Windows host port {target_win_port} complete.")
+            cfg.save_successful_upload(target_win_port, "win_failover")
+            logger.log_operation("upload", sketch_path.name, target_win_port, "SUCCESS", 0)
             return True
         else:
             if "not recognized" in res.stderr or "CommandNotFoundException" in res.stderr or res.returncode != 0:
@@ -143,6 +154,7 @@ def cmd_upload(args, cfg: Config):
                 print(f"        2. List connected USB devices:      usbipd list", file=sys.stderr)
                 print(f"        3. Attach device to WSL2:           usbipd attach --wsl --busid <BUSID>", file=sys.stderr)
                 print(f"----------------------------------------------------------", file=sys.stderr)
+            logger.log_operation("upload", sketch_path.name, target_win_port, "FAILED", res.returncode)
             return False
 
     if port.startswith("COM") or os.name == "nt":
@@ -155,6 +167,8 @@ def cmd_upload(args, cfg: Config):
     res = subprocess.run(cmd)
     if res.returncode == 0:
         print("[SUCCESS] Compile and upload complete.")
+        cfg.save_successful_upload(port, "wsl")
+        logger.log_operation("upload", sketch_path.name, port, "SUCCESS", 0)
         return
     else:
         print(f"[!] WSL port {port} upload failed (device not bound to WSL or port busy).", file=sys.stderr)
@@ -167,6 +181,7 @@ def cmd_upload(args, cfg: Config):
                     should_failover = True
             except (KeyboardInterrupt, EOFError):
                 print("\n[!] Failover canceled.")
+                logger.log_operation("upload", sketch_path.name, port, "FAILED", res.returncode)
                 sys.exit(res.returncode)
         else:
             should_failover = True
@@ -176,12 +191,14 @@ def cmd_upload(args, cfg: Config):
             if not run_windows_upload(win_port):
                 sys.exit(1)
         else:
+            logger.log_operation("upload", sketch_path.name, port, "FAILED", res.returncode)
             sys.exit(res.returncode)
 
 
 def cmd_monitor(args, cfg: Config):
     """Launches interactive serial monitor with UTF-8 decoding."""
-    port = DeviceDetector.resolve_port(args.port, cfg.port_wsl)
+    logger = OperationLogger(cfg.root_dir)
+    port = DeviceDetector.resolve_port(args.port or cfg.preferred_port, cfg.port_wsl)
     baud = args.baud or cfg.baud_default
 
     print(f"==========================================================")
@@ -191,6 +208,7 @@ def cmd_monitor(args, cfg: Config):
     print(f"[*] Baud Rate   : {baud}")
     print(f"[*] Exit        : Press Ctrl+C to disconnect")
     print(f"----------------------------------------------------------")
+    logger.log_operation("monitor", "N/A", port, "STARTED", 0)
 
     if port.startswith("COM"):
         # Windows Native PowerShell Serial Monitor Callout
@@ -224,6 +242,7 @@ def cmd_monitor(args, cfg: Config):
 
 def cmd_scan(args, cfg: Config):
     """Scans and lists active serial devices on WSL and Windows 11 host."""
+    logger = OperationLogger(cfg.root_dir)
     print("==========================================================")
     print("    Arduino26 Hardware & Serial Device Scanner            ")
     print("==========================================================")
@@ -239,10 +258,12 @@ def cmd_scan(args, cfg: Config):
     else:
         print("    - No host serial devices reported by PowerShell.")
     print("----------------------------------------------------------")
+    logger.log_operation("scan", "N/A", wsl_port or "None", "SUCCESS", 0)
 
 
 def cmd_config(args, cfg: Config):
     """Displays current active workspace configuration settings."""
+    logger = OperationLogger(cfg.root_dir)
     print("==========================================================")
     print("    Arduino26 Workspace Configuration                     ")
     print("==========================================================")
@@ -252,7 +273,12 @@ def cmd_config(args, cfg: Config):
     print(f"[*] Win Serial Port  : {cfg.port_win}")
     print(f"[*] Auto-Detected    : {DeviceDetector.find_wsl_port() or 'None'}")
     print(f"[*] Default Baud     : {cfg.baud_default}")
+    print(f"[*] Last Sketch      : {cfg.last_compiled_sketch}")
+    print(f"[*] Active Method    : {cfg.active_method}")
+    print(f"[*] Preferred Port   : {cfg.preferred_port or 'Not set (auto)'}")
+    print(f"[*] History Log      : {logger.history_log}")
     print("==========================================================")
+    logger.log_operation("config", "N/A", "N/A", "SUCCESS", 0)
 
 
 def main():

@@ -23,5 +23,7 @@ dev_tools_dir = "dev-tools"
 
 [state]
 last_compiled_sketch = "uno_clone_diag"
+active_method = "wsl"
+preferred_port = ""
 
 # file arduino_config.toml ends

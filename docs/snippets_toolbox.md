@@ -29,6 +29,7 @@ This document serves as the master catalog and snippets toolbox for all executab
 | Tool Script | Language | Purpose | Usage / Invocation | Provenance & Attribution |
 | :--- | :--- | :--- | :--- | :--- |
 | **`dev-tools/ard26_cli/`** | Python 3 (`ard26`) | Unified CLI convenience tool (`compile`, `upload`, `monitor`, `scan`, `config`). | `ard26 compile uno_clone_diag` | Arduino26 Unified CLI Specification |
+| **`dev-tools/ard26_cli/logger.py`** | Python 3 | Tracks operation history and telemetry into `ard26_history.log` and `ard26_telemetry.csv`. | Internal module in `ard26` | Arduino26 Telemetry Specification |
 | **`dev-tools/files2clip`** | Python 3 | Packs workspace files into clipboard with SHA256 headers & 250 KB overflow protection. | `files2clip sketches/ AI.md` | fekerr & Gemini |
 | **`dev-tools/clip2files`** | Python 3 | Extracts multi-file manifests from clipboard or stdin stream into workspace files. | `clip2files` | fekerr & Gemini |
 | **`dev-tools/patch_io.py`** | Python 3 | Bridge wrapper for input (`clip2files`) and output (`files2clip`). | `pto sketches/uno_blink` | fekerr & Gemini |

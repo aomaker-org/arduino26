@@ -85,10 +85,26 @@ class Config:
     def last_compiled_sketch(self) -> str:
         return self.data.get("state", {}).get("last_compiled_sketch", "uno_blink")
 
+    @property
+    def active_method(self) -> str:
+        return self.data.get("state", {}).get("active_method", "wsl")
+
+    @property
+    def preferred_port(self) -> str:
+        return self.data.get("state", {}).get("preferred_port", "")
+
     def set_last_compiled_sketch(self, sketch_name: str):
         if "state" not in self.data:
             self.data["state"] = {}
         self.data["state"]["last_compiled_sketch"] = sketch_name
+        self._write_config()
+
+    def save_successful_upload(self, port: str, method: str):
+        """Saves working port and upload method as defaults for future invocations."""
+        if "state" not in self.data:
+            self.data["state"] = {}
+        self.data["state"]["active_method"] = method
+        self.data["state"]["preferred_port"] = port
         self._write_config()
 
     def _write_config(self):
@@ -120,6 +136,8 @@ class Config:
                 "",
                 "[state]",
                 f'last_compiled_sketch = "{self.last_compiled_sketch}"',
+                f'active_method = "{self.active_method}"',
+                f'preferred_port = "{self.preferred_port}"',
                 "",
                 "# file arduino_config.toml ends",
                 ""

@@ -19,9 +19,16 @@ This guide documents the design decisions, configuration schema, and operational
    - On **WSL Ubuntu 26 Bash**, delegates compilation and uploading to `arduino-cli`.
    - On **Windows 11 Native Context**, routes commands via `cmd.exe` or `pwsh.exe -ExecutionPolicy Bypass` targeting `COM` ports (e.g. `COM5`).
 
-4. **Self-Contained `uv` Virtual Environment Integration:**
-   - Managed via [pyproject.toml](file:///home/fekerr/src/arduino26/pyproject.toml).
-   - Automatically installed into `.venv` via `uv pip install -e .` during environment sourcing (`source config_env`).
+5. **Last Compiled Sketch Memory & Interactive Prompt:**
+   - Successfully compiling a sketch (`ard26 compile <sketch>`) locks it in `arduino_config.toml` under `[state]`.
+   - Running `ard26 upload` without arguments prompts: `Upload the last compiled sketch [sketch_name]? [Y/n]`.
+
+6. **Automatic Upload Method Persistence & Failover:**
+   - When an upload method succeeds (WSL `/dev/ttyUSB0` or Windows `COM5`), `ard26` records the working method (`wsl` or `win_failover`) and `preferred_port` in `arduino_config.toml`.
+   - Subsequent `ard26 upload` commands reuse the successful method automatically without prompting.
+
+7. **Operation History & Telemetry Logging:**
+   - Every `ard26` invocation records command parameters, timestamps, target sketch, serial port, and exit status into `agy/log/ard26_history.log` and `agy/log/ard26_telemetry.csv`.
 
 ---
 
@@ -46,6 +53,32 @@ diag = 115200
 sketches_dir = "sketches"
 tools_dir = "tools"
 dev_tools_dir = "dev-tools"
+
+[state]
+last_compiled_sketch = "uno_clone_diag"
+active_method = "win_failover"
+preferred_port = "COM5"
+```
+
+---
+
+## 🛠️ Host Environment Provisioning (Windows 11 & WSL2)
+
+### 1. Windows Host `arduino-cli` Setup (Direct Host Flashing)
+To enable direct Windows host flashing on `COM` ports when USB devices are attached to Windows 11 host:
+```powershell
+# Run in PowerShell on Windows 11 Host:
+winget install Arduino.cli
+arduino-cli core update-index
+arduino-cli core install arduino:avr
+```
+
+### 2. WSL2 USB Device Binding via `usbipd-win`
+To bind physical CH340 / FT232 devices into WSL2:
+```powershell
+# Run in PowerShell on Windows 11 Host:
+pwsh.exe -Command "usbipd list"
+pwsh.exe -Command "usbipd attach --wsl --busid <BUSID>"
 ```
 
 ---
@@ -63,7 +96,7 @@ ard26 config
 
 ### 2. Compile Sketches
 ```bash
-# Compile default sketch (uno_blink)
+# Compile last compiled sketch (or default uno_blink)
 ard26 compile
 
 # Compile specific sketch by name or relative path
@@ -73,10 +106,10 @@ ard26 compile sketches/ky_015_000
 
 ### 3. Compile & Upload to Microcontroller
 ```bash
-# Upload to autodetected port using TOML default FQBN
-ard26 upload uno_clone_diag
+# Upload to last compiled sketch (prompts [Y/n])
+ard26 upload
 
-# Upload to explicit serial port
+# Upload specific sketch to explicit serial port
 ard26 upload uno_clone_diag -p /dev/ttyUSB0
 ard26 upload uno_clone_diag -p COM5
 ```
