@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Path:        tools/win11_monitor.sh
+# Path:        dev-tools/win11_monitor.sh
 # Purpose:     Wrapper to run Windows 11 PowerShell Serial Monitor with ExecutionPolicy Bypass
 # Target OS:   Ubuntu 24.04 / 26.04 LTS (WSL2 / Linux Native)
 # Lineage:     Arduino26 Infrastructure

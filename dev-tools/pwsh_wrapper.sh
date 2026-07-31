@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Path:        tools/pwsh_wrapper.sh
+# Path:        dev-tools/pwsh_wrapper.sh
 # Purpose:     General-purpose wrapper for invoking PowerShell commands/scripts
 #              with ExecutionPolicy Bypass enabled.
 # Target OS:   Ubuntu 24.04 / 26.04 LTS (WSL2 / Linux Native)

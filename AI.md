@@ -97,16 +97,14 @@ workflows, and repository hygiene for all assistants operating within the
 
 ---
 
-## 7. Script Management & Snippets Toolbox Directives (`tools/*`)
+---
 
-- **Script Placement Standard:** Whenever AGY or any AI assistant creates a helper
-  script, utility, or shell automation, it MUST be saved under `tools/*` with proper
-  execution permissions (`chmod +x`).
-- **Mandatory Documentation & Snippets Toolbox:** Every script added to `tools/*`
-  MUST be documented in `docs/snippets_toolbox.md`.
-- **Attribution & Provenance:** If a script or code block is derived from or relates to
-  external web resources (e.g. `usbipd-win`, `arduino-cli`, `pySerial`, Adafruit
-  libraries, or datasheets), explicit attribution and reference URLs MUST be included in
-  both the script header comments and `docs/snippets_toolbox.md`.
+## 7. Script Management & Snippets Toolbox Directives (`tools/*` vs `dev-tools/*`)
+
+- **Script Directory Separation:**
+  - **`./tools/`**: Saved exclusively for **Arduino work** (serial scanning, sketch uploading, serial monitors, board diagnostics).
+  - **`./dev-tools/`**: Saved for **WSL / Linux / Win11 helper tools** (context packing, clipboard exchange, PowerShell ExecutionPolicy wrappers, automated environment provisioning).
+- **Mandatory Cataloging:** Every script added to `tools/*` or `dev-tools/*` MUST be documented in `docs/snippets_toolbox.md`.
+- **Attribution & Provenance:** External web resources, datasheets, or library references MUST be attributed in script header comments and `docs/snippets_toolbox.md`.
 
 <!-- file AI.md ends -->

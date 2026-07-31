@@ -70,13 +70,18 @@ arduino26/
 │   ├── outbox/                   # Outbound turn status reports
 │   ├── log/                      # Forensic prompt/response logs & serial telemetry
 │   └── scratch/                  # Overflow context bundles (> 250 KB)
-├── tools/                        # Utility scripts
+├── tools/                        # Arduino Hardware & Serial Work Tools
+│   ├── arduino_serial_bridge.py  # Hardware scanner, Win11 PnP query & USB bridge
+│   ├── upload_sketch.sh          # CLI compilation & sketch upload helper
+│   ├── serial_monitor.py         # Python interactive serial monitor & logger
+│   └── win11_serial_monitor.ps1  # Native Windows 11 PowerShell serial monitor
+├── dev-tools/                    # WSL / Win11 Helper & System Tools
 │   ├── files2clip                # Pack workspace assets into clipboard for LLMs
 │   ├── clip2files                # Unpack clipboard context manifests into files
 │   ├── patch_io.py               # Input/Output bridge wrapper
-│   ├── upload_sketch.sh          # CLI compilation & sketch upload helper
-│   ├── serial_monitor.py         # Python interactive serial monitor & logger
-│   └── arduino_serial_bridge.py  # Hardware scanner, Win11 PnP query & USB bridge
+│   ├── win11_monitor.sh          # Wrapper for win11_serial_monitor.ps1 (Bypass)
+│   ├── pwsh_wrapper.sh           # PowerShell ExecutionPolicy Bypass wrapper
+│   └── provision_environment.sh  # Automated environment bootstrap script
 ├── sketches/                     # Arduino C++ sketch projects
 │   ├── uno_blink/                # Standard Uno blink sketch (.ino)
 │   ├── uno_clone_diag/           # Hardware diagnostic sketch (.ino)

@@ -92,17 +92,18 @@ if [[ $- == *i* ]]; then
     export PS1='\[\e]0;\u@\h: \w\a\]\n\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;36m\][arduino26${ARDUINO26_RUN_TYPE:+:$ARDUINO26_RUN_TYPE}]\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\] \[\033[01;33m\]\D{%y%m_%H%M}_\!\[\033[00m\]\n; '
 fi
 
-# 8. Aliases and Syntactic Sugar
-alias files2clip="python3 ${ARDUINO26_ROOT}/tools/files2clip"
-alias clip2files="python3 ${ARDUINO26_ROOT}/tools/clip2files"
-pto() { python3 "${ARDUINO26_ROOT}/tools/patch_io.py" out "$@"; }
-pti() { python3 "${ARDUINO26_ROOT}/tools/patch_io.py" in "$@"; }
+# 8. Aliases and Syntactic Sugar (dev-tools/ and tools/ separation)
+alias files2clip="python3 ${ARDUINO26_ROOT}/dev-tools/files2clip"
+alias clip2files="python3 ${ARDUINO26_ROOT}/dev-tools/clip2files"
+pto() { python3 "${ARDUINO26_ROOT}/dev-tools/patch_io.py" out "$@"; }
+pti() { python3 "${ARDUINO26_ROOT}/dev-tools/patch_io.py" in "$@"; }
 alias pack2clip=pto
 alias patch_incoming=pti
+alias win11_monitor="${ARDUINO26_ROOT}/dev-tools/win11_monitor.sh"
+alias pwsh_bypass="${ARDUINO26_ROOT}/dev-tools/pwsh_wrapper.sh"
+
 alias arduino_bridge="python3 ${ARDUINO26_ROOT}/tools/arduino_serial_bridge.py"
 alias arduino_scan="python3 ${ARDUINO26_ROOT}/tools/arduino_serial_bridge.py"
-alias win11_monitor="${ARDUINO26_ROOT}/tools/win11_monitor.sh"
-alias pwsh_bypass="${ARDUINO26_ROOT}/tools/pwsh_wrapper.sh"
 
 export ARDUINO26_READY=1
 echo "[+] Arduino26 environment loaded successfully (Root: ${ARDUINO26_ROOT})."
