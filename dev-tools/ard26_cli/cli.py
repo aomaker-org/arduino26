@@ -164,13 +164,26 @@ def cmd_upload(args, cfg: Config):
 
     # Linux / WSL Upload Callout
     cmd = [cli_bin, "compile", "-u", "-p", port, "--fqbn", fqbn, str(sketch_path)]
-    res = subprocess.run(cmd)
+    res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode == 0:
+        print(res.stdout)
         print("[SUCCESS] Compile and upload complete.")
         cfg.save_successful_upload(port, "wsl")
         logger.log_operation("upload", sketch_path.name, port, "SUCCESS", 0)
         return
     else:
+        if res.stdout:
+            print(res.stdout)
+        if res.stderr:
+            print(res.stderr, file=sys.stderr)
+
+        if "Permission denied" in res.stderr or "Permission denied" in res.stdout:
+            print(f"----------------------------------------------------------", file=sys.stderr)
+            print(f"[!] Permission denied accessing WSL serial node {port}.", file=sys.stderr)
+            print(f"[i] Run this command in terminal to fix device permissions:", file=sys.stderr)
+            print(f"        sudo chmod 666 {port}", file=sys.stderr)
+            print(f"----------------------------------------------------------", file=sys.stderr)
+
         print(f"[!] WSL port {port} upload failed (device not bound to WSL or port busy).", file=sys.stderr)
         win_port = cfg.port_win
         should_failover = False
