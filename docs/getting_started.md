@@ -44,17 +44,27 @@ source config_env "uno_testing"
 
 ## 3. Serial & USB Hardware Quick Reference
 
-### Checking Hardware via Callouts to Win11
-```bash
-# List physical USB devices connected to Windows host
-pwsh.exe -Command "usbipd list"
-
-# Attach CH340 / Uno device (e.g. BUSID 2-4) to WSL2
-pwsh.exe -Command "usbipd attach --wsl --busid 2-4"
-
-# Audit serial ports inside WSL2
-arduino_scan
-```
+### USB Passthrough Setup (`usbipd-win`)
+1. Install `usbipd-win` on Windows 11 host (PowerShell as Admin):
+   ```powershell
+   winget install dorssel.usbipd-win
+   ```
+2. List physical USB devices connected to Windows host:
+   ```bash
+   pwsh.exe -Command "usbipd list"
+   ```
+3. Share (bind) device on host (first-time Administrator step):
+   ```powershell
+   usbipd bind --busid <BUSID>
+   ```
+4. Attach CH340 / Uno device (e.g. BUSID 2-3) to WSL2:
+   ```bash
+   pwsh.exe -Command "usbipd attach --wsl --busid 2-3"
+   ```
+5. Audit serial ports inside WSL2:
+   ```bash
+   ard26 scan
+   ```
 
 ### Serial Port Permissions
 If `/dev/ttyUSB0` or `/dev/ttyACM0` gives permission denied:

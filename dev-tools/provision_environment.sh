@@ -88,13 +88,19 @@ else
     echo "[+] User $USER is already in dialout group."
 fi
 
-# 6. Windows 11 Host Utility Checklist
+# 6. Windows 11 Host Utility Checklist & usbipd Provisioning
 echo "[6/6] Checking Windows 11 Host Utilities (pwsh.exe & usbipd)..."
 if command -v pwsh.exe >/dev/null 2>&1; then
     echo "[+] PowerShell 7 (pwsh.exe) detected."
-    pwsh.exe -NoProfile -Command "Get-Command usbipd -ErrorAction SilentlyContinue" >/dev/null 2>&1 && \
-        echo "[+] usbipd detected on Windows host." || \
-        echo "[i] Note: 'usbipd' not detected on Windows host. Install via: winget install dorssel.usbipd-win"
+    if pwsh.exe -NoProfile -Command "Get-Command usbipd -ErrorAction SilentlyContinue" >/dev/null 2>&1; then
+        echo "[+] usbipd detected on Windows host."
+    else
+        echo "[!] 'usbipd' not detected on Windows 11 host."
+        echo "----------------------------------------------------------"
+        echo "[i] To install usbipd for WSL2 USB passthrough, open PowerShell as Admin and run:"
+        echo "        winget install dorssel.usbipd-win"
+        echo "----------------------------------------------------------"
+    fi
 elif command -v powershell.exe >/dev/null 2>&1; then
     echo "[+] Windows PowerShell (powershell.exe) detected."
 fi
