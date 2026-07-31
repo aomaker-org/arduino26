@@ -16,8 +16,8 @@ with the **WCH CH340 / CH340G / CH340C** USB-to-Serial converter.
 1. Download official CH340 Windows drivers from WCH:
    - [WCH CH341SER.EXE Official Driver Download](http://www.wch-ic.com/downloads/CH341SER_EXE.html)
 2. Run `CH341SER.EXE` on Windows 11 host and click **INSTALL**.
-3. Verify in Windows Device Manager under **Ports (COM & LPT)**:
-   - `USB-SERIAL CH340 (COM3)` or similar COM port entry.
+3. Verify in Windows Device Manager under **Ports (COM & LPT)** or Arduino IDE:
+   - `USB-SERIAL CH340 (COM5)` (or `COM3`, `COM4`, etc.).
 
 ---
 
@@ -39,7 +39,7 @@ host USB devices. The open-source `usbipd-win` utility bridges USB ports over IP
    *Sample Output:*
    ```
    BUSID  VID:PID    DEVICE                                                        STATE
-   1-4    1a86:7523  USB-SERIAL CH340 (COM3)                                       Not attached
+   1-4    1a86:7523  USB-SERIAL CH340 (COM5)                                       Not attached
    ```
 
 3. **Attach USB Device to WSL2:**
