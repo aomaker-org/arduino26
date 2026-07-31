@@ -42,12 +42,24 @@ host USB devices. The open-source `usbipd-win` utility bridges USB ports over IP
    1-4    1a86:7523  USB-SERIAL CH340 (COM5)                                       Not attached
    ```
 
-3. **Attach USB Device to WSL2:**
-   ```bash
-   pwsh.exe -Command "usbipd attach --wsl --busid 1-4"
+3. **Bind Device on Windows Host (Administrator Step):**
+   Before a device can be attached to WSL for the first time, it must be shared on the host:
+   ```powershell
+   usbipd bind --busid 2-3
    ```
 
-4. **Verify Device Binding Inside WSL2:**
+4. **Attach USB Device to WSL2:**
+   ```bash
+   pwsh.exe -Command "usbipd attach --wsl --busid 2-3"
+   ```
+
+5. **Firewall TCP Port 3240 Authorization:**
+   If `usbipd attach` reports `warning: A firewall appears to be blocking the connection; ensure TCP port 3240 is allowed`, run this command in **PowerShell (as Administrator)**:
+   ```powershell
+   New-NetFirewallRule -DisplayName "usbipd-win" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3240
+   ```
+
+6. **Verify Device Binding Inside WSL2:**
    ```bash
    lsusb
    ```
@@ -56,23 +68,26 @@ host USB devices. The open-source `usbipd-win` utility bridges USB ports over IP
    Bus 001 Device 002: ID 1a86:7523 QinHeng Electronics CH340 serial converter
    ```
 
-5. **Locate Serial Node:**
-   The device will automatically map to `/dev/ttyUSB0` (or `/dev/ttyACM0` for 16U2 chips):
+7. **Locate Serial Node & Fix Linux Permissions (`nobody:nogroup`):**
+   When `usbipd` mounts `/dev/ttyUSB0`, Linux assigns initial ownership `nobody:nogroup` (`crw-rw----`). Access by non-root users causes `OS error: cannot open port /dev/ttyUSB0: Permission denied`. Fix via:
    ```bash
-   ls -l /dev/ttyUSB* /dev/ttyACM*
+   sudo chmod 666 /dev/ttyUSB0
    ```
 
-6. **Detach Device (when finished):**
+8. **Detach Device (when finished):**
    ```bash
-   pwsh.exe -Command "usbipd detach --busid 1-4"
+   pwsh.exe -Command "usbipd detach --busid 2-3"
    ```
 
 ---
 
-## 3. Windows 11 Callouts via `cmd.exe` and `pwsh.exe`
+## 3. Windows 11 Interop & UNC Path Best Practices
 
 WSL2 allows execution of native Windows binaries directly from the bash terminal.
-Arduino26 utilizes this for PnP querying and USB control.
+
+### UNC Path Resolution (`cmd.exe` vs `pwsh.exe`)
+- **`cmd.exe` Limitation:** Executing `cmd.exe` from WSL paths (`/home/user/...`) fails with `UNC paths are not supported. Defaulting to Windows directory.` and resets working directory to `C:\Windows`.
+- **PowerShell 7 (`pwsh.exe`) Resolution:** Always use `pwsh.exe -ExecutionPolicy Bypass` with paths converted via `wslpath -w` to execute Windows host commands cleanly across WSL network shares (`\\wsl.localhost\Ubuntu-26.04\...`).
 
 ### Querying Host PnP Serial Devices
 Use `tools/arduino_serial_bridge.py` or run directly:
@@ -85,24 +100,17 @@ pwsh.exe -NoProfile -Command "Get-PnpDevice -PresentOnly | Where-Object { \
 } | Select-Object FriendlyName, InstanceId, Status"
 ```
 
-### Windows GUI Launching
-To launch the native Windows Arduino IDE 2.x from WSL bash:
-
-```bash
-cmd.exe /c start "" "C:\Program Files\Arduino IDE\Arduino IDE.exe"
-```
-
 ---
 
 ## 4. Troubleshooting Serial Permissions & Busy States
 
 - **Permission Denied on `/dev/ttyUSB0`:**
   ```bash
-  sudo usermod -aG dialout $USER
   sudo chmod 666 /dev/ttyUSB0
+  sudo usermod -aG dialout $USER
   ```
 - **Port Busy / Resource Temporarily Unavailable:**
   Ensure no serial monitors (e.g. Windows Serial Monitor, `picocom`, `minicom`, or `mpremote`)
-  are actively keeping `/dev/ttyUSB0` or `COM3` open during an `arduino-cli upload` cycle.
+  are actively keeping `/dev/ttyUSB0` or `COM5` open during an `arduino-cli upload` cycle.
 
 <!-- file docs/wsl_win11_hardware.md ends -->
