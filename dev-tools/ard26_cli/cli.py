@@ -54,7 +54,7 @@ def resolve_sketch_path(sketch_arg: str, root_dir: Path) -> Path:
 
 def cmd_compile(args, cfg: Config):
     """Executes sketch compilation via arduino-cli."""
-    sketch_path = resolve_sketch_path(args.sketch or "uno_blink", cfg.root_dir)
+    sketch_path = resolve_sketch_path(args.sketch or cfg.last_compiled_sketch, cfg.root_dir)
     fqbn = args.fqbn or cfg.fqbn
     cli_bin = find_arduino_cli()
 
@@ -71,6 +71,8 @@ def cmd_compile(args, cfg: Config):
     res = subprocess.run(cmd)
     if res.returncode == 0:
         print("[SUCCESS] Compilation completed successfully.")
+        cfg.set_last_compiled_sketch(sketch_path.name)
+        print(f"[*] Default upload sketch locked -> [{sketch_path.name}]")
     else:
         print(f"[X] Compilation failed with exit code {res.returncode}.", file=sys.stderr)
         sys.exit(res.returncode)
@@ -78,7 +80,22 @@ def cmd_compile(args, cfg: Config):
 
 def cmd_upload(args, cfg: Config):
     """Executes sketch compilation and flashing to serial port."""
-    sketch_path = resolve_sketch_path(args.sketch or "uno_blink", cfg.root_dir)
+    if not args.sketch:
+        target_name = cfg.last_compiled_sketch
+        if sys.stdin.isatty():
+            try:
+                ans = input(f"Upload the last compiled sketch [{target_name}]? [Y/n] ").strip()
+                if ans and not ans.lower().startswith('y'):
+                    print("[!] Upload canceled.")
+                    return
+            except (KeyboardInterrupt, EOFError):
+                print("\n[!] Upload canceled.")
+                return
+        sketch_arg = target_name
+    else:
+        sketch_arg = args.sketch
+
+    sketch_path = resolve_sketch_path(sketch_arg, cfg.root_dir)
     fqbn = args.fqbn or cfg.fqbn
     port = DeviceDetector.resolve_port(args.port, cfg.port_wsl)
     cli_bin = find_arduino_cli()
@@ -204,12 +221,12 @@ def main():
 
     # compile
     p_comp = subparsers.add_parser("compile", help="Compile an Arduino sketch")
-    p_comp.add_argument("sketch", nargs="?", default="uno_blink", help="Sketch directory or name (default: uno_blink)")
+    p_comp.add_argument("sketch", nargs="?", default=None, help="Sketch directory or name (default: last compiled sketch)")
     p_comp.add_argument("--fqbn", default=None, help="Fully Qualified Board Name")
 
     # upload
     p_up = subparsers.add_parser("upload", help="Compile and upload sketch to microcontroller")
-    p_up.add_argument("sketch", nargs="?", default="uno_blink", help="Sketch directory or name (default: uno_blink)")
+    p_up.add_argument("sketch", nargs="?", default=None, help="Sketch directory or name (default: last compiled sketch)")
     p_up.add_argument("-p", "--port", default=None, help="Target serial port (/dev/ttyUSB0 or COM5)")
     p_up.add_argument("--fqbn", default=None, help="Fully Qualified Board Name")
 

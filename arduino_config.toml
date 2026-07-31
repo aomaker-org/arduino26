@@ -21,4 +21,7 @@ sketches_dir = "sketches"
 tools_dir = "tools"
 dev_tools_dir = "dev-tools"
 
+[state]
+last_compiled_sketch = "uno_clone_diag"
+
 # file arduino_config.toml ends
