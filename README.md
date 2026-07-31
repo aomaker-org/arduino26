@@ -78,7 +78,8 @@ arduino26/
 │   └── arduino_serial_bridge.py  # Hardware scanner, Win11 PnP query & USB bridge
 ├── sketches/                     # Arduino C++ sketch projects
 │   ├── uno_blink/                # Standard Uno blink sketch (.ino)
-│   └── uno_clone_diag/           # Hardware diagnostic sketch (.ino)
+│   ├── uno_clone_diag/           # Hardware diagnostic sketch (.ino)
+│   └── ky015_dht11/              # KY-015 / DHT11 "Blue Block" Temp & Humidity sketch (.ino)
 ├── asm/                          # Bare metal AVR Assembly projects
 │   └── uno_blink/                # AVR assembly source & Makefile
 ├── rust/                         # Bare metal Rust projects
