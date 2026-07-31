@@ -58,4 +58,16 @@ This file tracks planned features, architectural considerations, and open backlo
 
 ---
 
+### Item #005: [+] Smart Incremental Compilation for `ard26 run`
+- **Category:** CLI Performance & Smart Build System
+- **Date Added:** 2026-07-31
+- **Status:** `[+]` High Priority / Planned
+- **Problem Statement:** Executing `ard26 run <sketch>` or `ard26 compile upload monitor <sketch>` currently invokes `arduino-cli compile` on every run. If source code (`.ino`, `.cpp`, `.h`) has not been modified since the last compilation, compiling is redundant.
+- **Proposed Behavior:**
+  - **Conditional Compilation:** Compare the maximum modification timestamp (`mtime`) of sketch source files against the compiled `.hex` / `.elf` artifact under `.build/<sketch>/`. If the compiled binary is newer than all source files, skip compilation and proceed directly to upload!
+  - **Force Rebuild Flag:** Support `--force` / `-f` in `ard26 run` and `ard26 compile` to bypass the source freshness check when explicit clean rebuilds are requested.
+  - **Upload Skip Determination:** Uploading will execute whenever requested in `run`, but hardware flash payload hashing / verification can be evaluated as a stretch goal.
+
+---
+
 <!-- file docs/todo_backlog.md ends -->
