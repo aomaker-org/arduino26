@@ -42,6 +42,12 @@
 # ard26 config
 
 # ------------------------------------------------------------------------------
+# 6. Chained Subcommands & One-Shot Pipelines (Compile -> Upload -> Monitor)
+# ------------------------------------------------------------------------------
+# ard26 run uno_clone_diag
+# ard26 compile upload monitor sketches/uno_clone_diag
+
+# ------------------------------------------------------------------------------
 # 6. Windows 11 Host Integration & USB Passthrough (Run from WSL or Win11)
 # ------------------------------------------------------------------------------
 # pwsh_bypass -Command "usbipd list"

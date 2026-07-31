@@ -301,8 +301,60 @@ def cmd_config(args, cfg: Config):
     logger.log_operation("config", "N/A", "N/A", "SUCCESS", 0)
 
 
+def cmd_run(args, cfg: Config):
+    """Executes sequential pipeline: Compile -> Upload -> Monitor."""
+    print("==========================================================")
+    print("    Arduino26 Pipeline: Compile -> Upload -> Monitor      ")
+    print("==========================================================")
+    # Step 1: Compile
+    cmd_compile(args, cfg)
+    print("----------------------------------------------------------")
+    # Step 2: Upload
+    cmd_upload(args, cfg)
+    print("----------------------------------------------------------")
+    # Step 3: Monitor
+    cmd_monitor(args, cfg)
+
+
 def main():
     cfg = Config()
+
+    # Pre-process sys.argv to handle multi-subcommand chaining like:
+    # "ard26 compile upload monitor sketches/uno_clone_diag"
+    argv = sys.argv[1:]
+    if len(argv) >= 2:
+        valid_cmds = {"compile", "upload", "monitor", "run"}
+        cmds_found = []
+        sketch_found = None
+
+        for arg in argv:
+            if arg in valid_cmds:
+                cmds_found.append(arg)
+            elif not arg.startswith("-"):
+                sketch_found = arg
+
+        if len(cmds_found) > 1:
+            print(f"[*] Detected chained commands: {' -> '.join(cmds_found)}")
+            # Construct a synthetic namespace
+            class SyntheticArgs:
+                def __init__(self, sketch):
+                    self.sketch = sketch
+                    self.fqbn = None
+                    self.port = None
+                    self.baud = None
+            
+            synth_args = SyntheticArgs(sketch_found)
+
+            if "compile" in cmds_found:
+                cmd_compile(synth_args, cfg)
+                print("----------------------------------------------------------")
+            if "upload" in cmds_found:
+                cmd_upload(synth_args, cfg)
+                print("----------------------------------------------------------")
+            if "monitor" in cmds_found:
+                cmd_monitor(synth_args, cfg)
+            return
+
     parser = argparse.ArgumentParser(
         prog="ard26",
         description="Arduino26 Unified Embedded CLI & Telemetry Convenience Tool",
@@ -312,19 +364,26 @@ def main():
 
     # compile
     p_comp = subparsers.add_parser("compile", help="Compile an Arduino sketch")
-    p_comp.add_argument("sketch", nargs="?", default=None, help="Sketch directory or name (default: last compiled sketch)")
+    p_comp.add_argument("sketch", nargs="?", default=None, help="Sketch directory or name")
     p_comp.add_argument("--fqbn", default=None, help="Fully Qualified Board Name")
 
     # upload
     p_up = subparsers.add_parser("upload", help="Compile and upload sketch to microcontroller")
-    p_up.add_argument("sketch", nargs="?", default=None, help="Sketch directory or name (default: last compiled sketch)")
+    p_up.add_argument("sketch", nargs="?", default=None, help="Sketch directory or name")
     p_up.add_argument("-p", "--port", default=None, help="Target serial port (/dev/ttyUSB0 or COM5)")
     p_up.add_argument("--fqbn", default=None, help="Fully Qualified Board Name")
 
     # monitor
-    p_mon = subparsers.add_parser("monitor", help="Open interactive serial monitor with UTF-8 support")
+    p_mon = subparsers.add_parser("monitor", help="Open interactive serial monitor with telemetry logging")
     p_mon.add_argument("-p", "--port", default=None, help="Target serial port")
     p_mon.add_argument("-b", "--baud", type=int, default=None, help="Baud rate (default: 115200)")
+
+    # run (compile -> upload -> monitor pipeline)
+    p_run = subparsers.add_parser("run", help="Compile, upload, and open serial monitor in sequence")
+    p_run.add_argument("sketch", nargs="?", default=None, help="Sketch directory or name")
+    p_run.add_argument("-p", "--port", default=None, help="Target serial port")
+    p_run.add_argument("-b", "--baud", type=int, default=None, help="Baud rate")
+    p_run.add_argument("--fqbn", default=None, help="Fully Qualified Board Name")
 
     # scan
     subparsers.add_parser("scan", help="Scan local WSL and Windows 11 serial devices")
@@ -342,6 +401,7 @@ def main():
         "compile": cmd_compile,
         "upload": cmd_upload,
         "monitor": cmd_monitor,
+        "run": cmd_run,
         "scan": cmd_scan,
         "config": cmd_config,
     }
