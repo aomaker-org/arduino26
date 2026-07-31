@@ -212,8 +212,19 @@ def cmd_upload(args, cfg: Config):
 def cmd_monitor(args, cfg: Config):
     """Launches interactive serial monitor with UTF-8 decoding and telemetry file logging."""
     logger = OperationLogger(cfg.root_dir)
-    port = DeviceDetector.resolve_port(args.port or cfg.preferred_port, cfg.port_wsl)
-    baud = args.baud or cfg.baud_default
+    port = DeviceDetector.resolve_port(getattr(args, 'port', None) or cfg.preferred_port, cfg.port_wsl)
+    
+    # Auto-detect baud rate from sketch .ino source files if not explicitly specified
+    sketch_arg = getattr(args, 'sketch', None) or cfg.last_compiled_sketch
+    sketch_path = resolve_sketch_path(sketch_arg, cfg.root_dir)
+    detected_baud = DeviceDetector.detect_sketch_baud(sketch_path)
+
+    if getattr(args, 'baud', None):
+        baud = args.baud
+    elif detected_baud:
+        baud = detected_baud
+    else:
+        baud = cfg.baud_default
 
     t_logger = TelemetryLogger(cfg.root_dir, port, baud)
 
@@ -221,7 +232,7 @@ def cmd_monitor(args, cfg: Config):
     print(f"    Arduino26 Unified Serial Monitor                      ")
     print(f"==========================================================")
     print(f"[*] Target Port : {port}")
-    print(f"[*] Baud Rate   : {baud}")
+    print(f"[*] Baud Rate   : {baud} {'(auto-detected from sketch)' if detected_baud and not getattr(args, 'baud', None) else ''}")
     print(f"[*] Session Log : {t_logger.session_log.name}")
     print(f"[*] Exit        : Press Ctrl+C to disconnect")
     print(f"----------------------------------------------------------")

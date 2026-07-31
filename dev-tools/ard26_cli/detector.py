@@ -50,6 +50,30 @@ class DeviceDetector:
             pass
         return devices
 
+    @staticmethod
+    def detect_sketch_baud(sketch_dir: Path) -> Optional[int]:
+        """Scans sketch .ino files for Serial.begin(baud) to auto-detect baud rate."""
+        import re
+        if not sketch_dir:
+            return None
+        
+        # Resolve path if string or path object
+        p = Path(sketch_dir)
+        if p.is_file():
+            p = p.parent
+        elif not p.is_dir():
+            return None
+
+        for ino_file in p.glob("*.ino"):
+            try:
+                content = ino_file.read_text(encoding="utf-8", errors="ignore")
+                match = re.search(r'Serial\.begin\s*\(\s*(\d+)\s*\)', content)
+                if match:
+                    return int(match.group(1))
+            except Exception:
+                pass
+        return None
+
     @classmethod
     def resolve_port(cls, user_port: Optional[str] = None, default_port: str = "/dev/ttyUSB0") -> str:
         """Resolves target port: explicit user port -> autodetected port -> config default."""
