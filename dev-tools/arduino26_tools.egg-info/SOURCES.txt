@@ -1,0 +1,13 @@
+LICENSE
+README.md
+pyproject.toml
+dev-tools/ard26_cli/__init__.py
+dev-tools/ard26_cli/cli.py
+dev-tools/ard26_cli/config.py
+dev-tools/ard26_cli/detector.py
+dev-tools/arduino26_tools.egg-info/PKG-INFO
+dev-tools/arduino26_tools.egg-info/SOURCES.txt
+dev-tools/arduino26_tools.egg-info/dependency_links.txt
+dev-tools/arduino26_tools.egg-info/entry_points.txt
+dev-tools/arduino26_tools.egg-info/requires.txt
+dev-tools/arduino26_tools.egg-info/top_level.txt

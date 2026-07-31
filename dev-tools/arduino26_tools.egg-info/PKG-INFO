@@ -1,3 +1,15 @@
+Metadata-Version: 2.4
+Name: arduino26-tools
+Version: 0.1.0
+Summary: Convenience CLI and Serial Telemetry Tooling for Arduino26
+Author: fekerr & Antigravity AI Team
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pyserial>=3.5
+Dynamic: license-file
+
 # Arduino26: Embedded Systems & Multi-Agent AI Development Environment
 <!-- file: README.md -->
 

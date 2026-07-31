@@ -1,0 +1,24 @@
+# file: arduino_config.toml
+# Purpose: Visible, non-hidden TOML configuration file for the ard26 CLI tool
+# Target OS: Ubuntu 24.04 / 26.04 LTS (WSL2) + Windows 11 Host
+
+[board]
+fqbn = "arduino:avr:uno"
+mcu = "atmega328p"
+
+[port]
+wsl = "/dev/ttyUSB0"
+win = "COM5"
+autodetect = true
+
+[baud]
+default = 115200
+dht11 = 9600
+diag = 115200
+
+[paths]
+sketches_dir = "sketches"
+tools_dir = "tools"
+dev_tools_dir = "dev-tools"
+
+# file arduino_config.toml ends

@@ -1,0 +1,2 @@
+[console_scripts]
+ard26 = ard26_cli.cli:main
