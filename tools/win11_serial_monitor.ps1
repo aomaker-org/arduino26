@@ -17,7 +17,9 @@ Write-Host "[*] Exit        : Press Ctrl+C to disconnect" -ForegroundColor Yello
 Write-Host "----------------------------------------------------------"
 
 try {
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
     $sp = New-Object System.IO.Ports.SerialPort $Port, $Baud, None, 8, One
+    $sp.Encoding = [System.Text.Encoding]::UTF8
     $sp.ReadTimeout = 1000
     $sp.WriteTimeout = 1000
     $sp.Open()
