@@ -129,9 +129,38 @@ def cmd_upload(args, cfg: Config):
         res = subprocess.run(cmd)
         if res.returncode == 0:
             print("[SUCCESS] Compile and upload complete.")
+            return
         else:
-            print(f"[X] Upload failed with exit code {res.returncode}.", file=sys.stderr)
-            sys.exit(res.returncode)
+            print(f"[!] WSL port {port} upload failed (or device not bound to WSL).", file=sys.stderr)
+            win_port = cfg.port_win
+            should_failover = False
+            if sys.stdin.isatty():
+                try:
+                    ans = input(f"Failover to Windows 11 host environment ({win_port})? [Y/n] ").strip()
+                    if not ans or ans.lower().startswith('y'):
+                        should_failover = True
+                except (KeyboardInterrupt, EOFError):
+                    print("\n[!] Failover canceled.")
+                    sys.exit(res.returncode)
+            else:
+                should_failover = True
+
+            if should_failover:
+                print(f"[*] Failing over to Windows host port {win_port}...")
+                win_cmd = ["cmd.exe", "/c", "arduino-cli", "compile", "--fqbn", fqbn, str(sketch_path)]
+                r1 = subprocess.run(win_cmd)
+                if r1.returncode != 0:
+                    sys.exit(r1.returncode)
+                    
+                win_upload = ["cmd.exe", "/c", "arduino-cli", "upload", "-p", win_port, "--fqbn", fqbn, str(sketch_path)]
+                r2 = subprocess.run(win_upload)
+                if r2.returncode == 0:
+                    print(f"[SUCCESS] Failover upload to Windows host port {win_port} complete.")
+                    return
+                else:
+                    sys.exit(r2.returncode)
+            else:
+                sys.exit(res.returncode)
 
 
 def cmd_monitor(args, cfg: Config):
