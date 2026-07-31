@@ -45,6 +45,7 @@
 # 6. Windows 11 Host Integration & USB Passthrough (Run from WSL or Win11)
 # ------------------------------------------------------------------------------
 # pwsh_bypass -Command "usbipd list"
+# pwsh_bypass -Command "usbipd --version; Get-Command usbipd | Select-Object Name, Source; Get-Service usbipd -ErrorAction SilentlyContinue"
 # pwsh_bypass -Command "usbipd attach --wsl --busid 2-1"
 # pwsh_bypass -Command "winget install Arduino.cli"
 
