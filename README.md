@@ -79,7 +79,8 @@ arduino26/
 ├── sketches/                     # Arduino C++ sketch projects
 │   ├── uno_blink/                # Standard Uno blink sketch (.ino)
 │   ├── uno_clone_diag/           # Hardware diagnostic sketch (.ino)
-│   └── ky015_dht11/              # KY-015 / DHT11 "Blue Block" Temp & Humidity sketch (.ino)
+│   ├── ky015_dht11/              # KY-015 / DHT11 Standalone Temp & Humidity sketch (.ino)
+│   └── ky_015_000/               # KY-015 / DHT11 Adafruit Library sketch (.ino)
 ├── asm/                          # Bare metal AVR Assembly projects
 │   └── uno_blink/                # AVR assembly source & Makefile
 ├── rust/                         # Bare metal Rust projects
