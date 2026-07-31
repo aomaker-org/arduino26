@@ -88,14 +88,15 @@ workflows, and repository hygiene for all assistants operating within the
 - **STRICT NO PIPE TO NULL:** NEVER pipe standard output or standard error to
   `/dev/null`. Hide nothing. Route diagnostic output into timestamped logs under
   `agy/log/` or `logs/` if terminal clutter must be reduced.
+- **STRICT NO UNVERIFIED CURL PIPING:** NEVER pipe `curl` or `wget` downloads directly
+  into `sh` or `bash` (`curl ... | sh`). Always download to an explicit temporary file,
+  verify download completion, or use official package managers (`apt`, `uv`, `pip`, `winget`).
 - **Empirical Verification Required:** NEVER declare success without running
   empirical build/test verification commands (e.g. `arduino-cli compile`,
   `python3 tools/...`, `make`).
 - **Aggressively FOSS:** This repository adheres to open source principles.
   All code, tools, and documentation are licensed under permissive FOSS licenses
   (MIT, Apache 2.0, Unlicense / CC0).
-
----
 
 ---
 

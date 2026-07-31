@@ -26,7 +26,12 @@ sudo apt-get install -y -qq build-essential python3 python3-pip python3-venv git
 # 2. Install / Upgrade uv (Fast Python Package Installer)
 echo "[2/6] Auditing 'uv' Python package manager..."
 if ! command -v uv >/dev/null 2>&1; then
-    curl -sSf https://astral.sh/uv/install.sh | sh
+    echo "[*] Downloading uv installer to temporary file..."
+    TMP_UV="$(mktemp /tmp/install_uv_XXXXXX.sh)"
+    if curl -fsSL "https://astral.sh/uv/install.sh" -o "${TMP_UV}"; then
+        sh "${TMP_UV}" || true
+    fi
+    rm -f "${TMP_UV}"
     export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
@@ -55,7 +60,12 @@ fi
 echo "[4/6] Auditing 'arduino-cli'..."
 if ! command -v arduino-cli >/dev/null 2>&1; then
     mkdir -p "${HOME}/.local/bin"
-    curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="${HOME}/.local/bin" sh || true
+    echo "[*] Downloading arduino-cli installer to temporary file..."
+    TMP_CLI="$(mktemp /tmp/install_cli_XXXXXX.sh)"
+    if curl -fsSL "https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh" -o "${TMP_CLI}"; then
+        BINDIR="${HOME}/.local/bin" sh "${TMP_CLI}" || true
+    fi
+    rm -f "${TMP_CLI}"
     export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
