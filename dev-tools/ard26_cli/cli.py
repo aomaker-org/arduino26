@@ -104,63 +104,79 @@ def cmd_upload(args, cfg: Config):
     print(f"[*] Target FQBN      : {fqbn}")
     print(f"[*] Target Port      : {port}")
 
-    if port.startswith("COM") or os.name == "nt":
-        # Windows Native Upload Callout
-        win_cmd = ["cmd.exe", "/c", "arduino-cli", "compile", "--fqbn", fqbn, str(sketch_path)]
-        print(f"[*] Executing Windows host compile callout...")
-        r1 = subprocess.run(win_cmd)
-        if r1.returncode != 0:
-            sys.exit(r1.returncode)
-            
-        win_upload = ["cmd.exe", "/c", "arduino-cli", "upload", "-p", port, "--fqbn", fqbn, str(sketch_path)]
-        print(f"[*] Executing Windows host upload callout to {port}...")
-        r2 = subprocess.run(win_upload)
-        if r2.returncode == 0:
-            print("[SUCCESS] Upload to Windows host port complete.")
-        else:
-            sys.exit(r2.returncode)
-    if not port.startswith("COM") and not os.name == "nt":
-        if not cli_bin:
-            print("[!] 'arduino-cli' not found in PATH or ~/.local/bin.", file=sys.stderr)
-            print("[!] To install required utilities, run: ./dev-tools/provision_environment.sh", file=sys.stderr)
-            sys.exit(1)
-        # Linux / WSL Upload Callout
-        cmd = [cli_bin, "compile", "-u", "-p", port, "--fqbn", fqbn, str(sketch_path)]
-        res = subprocess.run(cmd)
-        if res.returncode == 0:
-            print("[SUCCESS] Compile and upload complete.")
-            return
-        else:
-            print(f"[!] WSL port {port} upload failed (or device not bound to WSL).", file=sys.stderr)
-            win_port = cfg.port_win
-            should_failover = False
-            if sys.stdin.isatty():
-                try:
-                    ans = input(f"Failover to Windows 11 host environment ({win_port})? [Y/n] ").strip()
-                    if not ans or ans.lower().startswith('y'):
-                        should_failover = True
-                except (KeyboardInterrupt, EOFError):
-                    print("\n[!] Failover canceled.")
-                    sys.exit(res.returncode)
-            else:
-                should_failover = True
+    if not cli_bin:
+        print("[!] 'arduino-cli' not found in PATH or ~/.local/bin.", file=sys.stderr)
+        print("[!] To install required utilities, run: ./dev-tools/provision_environment.sh", file=sys.stderr)
+        sys.exit(1)
 
-            if should_failover:
-                print(f"[*] Failing over to Windows host port {win_port}...")
-                win_cmd = ["cmd.exe", "/c", "arduino-cli", "compile", "--fqbn", fqbn, str(sketch_path)]
-                r1 = subprocess.run(win_cmd)
-                if r1.returncode != 0:
-                    sys.exit(r1.returncode)
-                    
-                win_upload = ["cmd.exe", "/c", "arduino-cli", "upload", "-p", win_port, "--fqbn", fqbn, str(sketch_path)]
-                r2 = subprocess.run(win_upload)
-                if r2.returncode == 0:
-                    print(f"[SUCCESS] Failover upload to Windows host port {win_port} complete.")
-                    return
-                else:
-                    sys.exit(r2.returncode)
-            else:
+    # Convert sketch path to Windows UNC path if needed
+    win_sketch_path = str(sketch_path)
+    try:
+        wsl_res = subprocess.run(["wslpath", "-w", str(sketch_path)], stdout=subprocess.PIPE, text=True)
+        if wsl_res.returncode == 0 and wsl_res.stdout.strip():
+            win_sketch_path = wsl_res.stdout.strip()
+    except Exception:
+        pass
+
+    def run_windows_upload(target_win_port: str) -> bool:
+        """Executes upload on Windows host via pwsh.exe with UNC path support."""
+        print(f"[*] Executing Windows host upload to {target_win_port}...")
+        ps_cmd = [
+            "pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
+            f"arduino-cli upload -p {target_win_port} --fqbn {fqbn} '{win_sketch_path}'"
+        ]
+        res = subprocess.run(ps_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        if res.returncode == 0:
+            print(f"[SUCCESS] Upload to Windows host port {target_win_port} complete.")
+            return True
+        else:
+            if "not recognized" in res.stderr or "CommandNotFoundException" in res.stderr or res.returncode != 0:
+                print(f"[!] Windows host upload failed on {target_win_port}.", file=sys.stderr)
+                print(f"----------------------------------------------------------", file=sys.stderr)
+                print(f"[i] 'arduino-cli' is not installed in your Windows 11 host environment.", file=sys.stderr)
+                print(f"[i] To install arduino-cli on Windows host, open PowerShell as Admin and run:", file=sys.stderr)
+                print(f"        winget install Arduino.cli", file=sys.stderr)
+                print(f"        arduino-cli core update-index && arduino-cli core install arduino:avr", file=sys.stderr)
+                print(f"----------------------------------------------------------", file=sys.stderr)
+                print(f"[i] Alternatively, attach your physical USB device (CH340) into WSL2:", file=sys.stderr)
+                print(f"        1. Open PowerShell on Windows host: pwsh.exe", file=sys.stderr)
+                print(f"        2. List connected USB devices:      usbipd list", file=sys.stderr)
+                print(f"        3. Attach device to WSL2:           usbipd attach --wsl --busid <BUSID>", file=sys.stderr)
+                print(f"----------------------------------------------------------", file=sys.stderr)
+            return False
+
+    if port.startswith("COM") or os.name == "nt":
+        if not run_windows_upload(port):
+            sys.exit(1)
+        return
+
+    # Linux / WSL Upload Callout
+    cmd = [cli_bin, "compile", "-u", "-p", port, "--fqbn", fqbn, str(sketch_path)]
+    res = subprocess.run(cmd)
+    if res.returncode == 0:
+        print("[SUCCESS] Compile and upload complete.")
+        return
+    else:
+        print(f"[!] WSL port {port} upload failed (device not bound to WSL or port busy).", file=sys.stderr)
+        win_port = cfg.port_win
+        should_failover = False
+        if sys.stdin.isatty():
+            try:
+                ans = input(f"Failover to Windows 11 host environment ({win_port})? [Y/n] ").strip()
+                if not ans or ans.lower().startswith('y'):
+                    should_failover = True
+            except (KeyboardInterrupt, EOFError):
+                print("\n[!] Failover canceled.")
                 sys.exit(res.returncode)
+        else:
+            should_failover = True
+
+        if should_failover:
+            print(f"[*] Failing over to Windows host port {win_port}...")
+            if not run_windows_upload(win_port):
+                sys.exit(1)
+        else:
+            sys.exit(res.returncode)
 
 
 def cmd_monitor(args, cfg: Config):
