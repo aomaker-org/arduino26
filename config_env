@@ -84,8 +84,11 @@ elif command -v python3 >/dev/null 2>&1; then
 fi
 
 # 6. Hardware & Arduino Defaults Configuration
-export ARDUINO_DEFAULT_PORT="${ARDUINO_DEFAULT_PORT:-/dev/ttyACM0}"
-export ARDUINO_DEFAULT_FQBN="${ARDUINO_DEFAULT_FQBN:-arduino:avr:uno}"
+if [ -f "${ARDUINO26_ROOT}/arduino_config.env" ]; then
+    source "${ARDUINO26_ROOT}/arduino_config.env"
+fi
+export ARDUINO_DEFAULT_PORT="${ARDUINO_PORT_WSL:-/dev/ttyUSB0}"
+export ARDUINO_DEFAULT_FQBN="${ARDUINO_FQBN:-arduino:avr:uno}"
 
 # 7. Interactive Prompt Customization
 if [[ $- == *i* ]]; then
