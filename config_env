@@ -1,18 +1,18 @@
-#!/usr/bin/env bash
 # ==============================================================================
 # Path:        config_env
 # Purpose:     Idempotent WSL2/Ubuntu environment loader for Arduino26
-#              Hardware/Serial Toolchain, AGY interop, and CLI utilities.
 # Target OS:   Ubuntu 24.04 / 26.04 LTS (WSL2 / Linux Native)
-# Type:        Sourced Script (Execute via 'source config_env' or '. config_env')
-# Lineage:     Arduino26 Infrastructure (Derived & Simplified from irislime)
+# Type:        Source-Only Script (DO NOT EXECUTE. Run via 'source config_env')
+# Lineage:     Arduino26 Infrastructure
 # Updated:     2026-07-31
 # ==============================================================================
 
-# 1. Guard: Prevent direct subshell execution without killing the active terminal
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    echo "[!] ERROR: You must SOURCE this file, not execute it." >&2
-    echo "    Usage: source config_env [force|unset|<prompt_tag>]" >&2
+# 1. Guard: Strictly prevent direct subshell execution
+if [ "${BASH_SOURCE[0]}" -ef "${0}" ] 2>/dev/null || [ "${BASH_SOURCE[0]}" == "${0}" ]; then
+    echo "[!] ERROR: 'config_env' is a source-only script and cannot be executed directly." >&2
+    echo "    To modify your shell environment, load it using:" >&2
+    echo "        source config_env [force|unset|<prompt_tag>]" >&2
+    echo "    or: . config_env [force|unset|<prompt_tag>]" >&2
     return 1 2>/dev/null || exit 1
 fi
 
