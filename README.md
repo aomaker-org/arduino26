@@ -101,6 +101,7 @@ arduino26/
     ├── arduino_environments.md   # Deep dive into C++, Assembly, Rust, & MicroPython
     ├── wsl_win11_hardware.md     # CH340 driver, usbipd, and Win11 callouts
     ├── agy_context_interop.md    # Multi-agent AI inbox/outbox & clipboard workflow
+    ├── todo_backlog.md           # Workspace TODO & Backlog Registry
     └── licensing.md              # FOSS options (MIT, Apache 2.0, Unlicense, GPL)
 ```
 
@@ -118,6 +119,7 @@ For full setup guides, datasheets, toolchain installation, and web resources:
 6. 🛠️ [Arduino Development Environments Guide](file:///home/fekerr/src/arduino26/docs/arduino_environments.md)
 7. 🔌 [WSL2 & Windows 11 Hardware Passthrough Guide](file:///home/fekerr/src/arduino26/docs/wsl_win11_hardware.md)
 8. 🤖 [AGY Multi-Agent AI Workflow Guide](file:///home/fekerr/src/arduino26/docs/agy_context_interop.md)
-9. ⚖️ [FOSS Licensing Documentation](file:///home/fekerr/src/arduino26/docs/licensing.md)
+9. 📋 [Workspace TODO & Backlog Registry](file:///home/fekerr/src/arduino26/docs/todo_backlog.md)
+10. ⚖️ [FOSS Licensing Documentation](file:///home/fekerr/src/arduino26/docs/licensing.md)
 
 <!-- file README.md ends -->
