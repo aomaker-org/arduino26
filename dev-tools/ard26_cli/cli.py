@@ -213,14 +213,15 @@ def cmd_monitor(args, cfg: Config):
     logger = OperationLogger(cfg.root_dir)
     port = DeviceDetector.resolve_port(args.port or cfg.preferred_port, cfg.port_wsl)
     baud = args.baud or cfg.baud_default
-    telemetry_log = cfg.root_dir / "agy" / "log" / "serial_telemetry.log"
+
+    t_logger = TelemetryLogger(cfg.root_dir, port, baud)
 
     print(f"==========================================================")
     print(f"    Arduino26 Unified Serial Monitor                      ")
     print(f"==========================================================")
     print(f"[*] Target Port : {port}")
     print(f"[*] Baud Rate   : {baud}")
-    print(f"[*] Telemetry   : {telemetry_log}")
+    print(f"[*] Session Log : {t_logger.session_log.name}")
     print(f"[*] Exit        : Press Ctrl+C to disconnect")
     print(f"----------------------------------------------------------")
     logger.log_operation("monitor", "N/A", port, "STARTED", 0)
@@ -233,30 +234,30 @@ def cmd_monitor(args, cfg: Config):
             "-Port", port, "-Baud", str(baud)
         ]
         subprocess.run(ps_cmd)
+        t_logger.close(status="Host Windows Monitor Complete")
         return
 
     if serial is None:
         print("[X] Error: pySerial is required for Linux serial monitor. Run: pip install pyserial", file=sys.stderr)
+        t_logger.close(status="Error: pySerial Missing")
         sys.exit(1)
 
     try:
         ser = serial.Serial(port, baud, timeout=1.0)
-        print(f"[+] Connected to {port} at {baud} baud (UTF-8). Logging to file...")
-        with open(telemetry_log, "a", encoding="utf-8") as f_log:
-            while ser.is_open:
-                if ser.in_waiting > 0:
-                    line = ser.readline().decode("utf-8", errors="ignore").strip()
-                    if line:
-                        ts = time.strftime("%Y-%m-%d %H:%M:%S")
-                        log_entry = f"[{ts}] {line}"
-                        print(log_entry)
-                        f_log.write(log_entry + "\n")
-                        f_log.flush()
-                time.sleep(0.01)
+        print(f"[+] Connected to {port} at {baud} baud (UTF-8). Logging to {t_logger.session_log.name}...")
+        while ser.is_open:
+            if ser.in_waiting > 0:
+                line = ser.readline().decode("utf-8", errors="ignore").strip()
+                if line:
+                    formatted = t_logger.log_line(line)
+                    print(formatted)
+            time.sleep(0.01)
     except KeyboardInterrupt:
         print(f"\n[*] Disconnected from {port}.")
+        t_logger.close(status="Clean Exit (Ctrl+C)")
     except Exception as e:
         print(f"[X] Serial Error on {port}: {e}", file=sys.stderr)
+        t_logger.close(status=f"Serial Error: {e}")
 
 
 def cmd_scan(args, cfg: Config):

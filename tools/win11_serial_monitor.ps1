@@ -31,27 +31,76 @@ try {
     exit 1
 }
 
-$LogPath = Join-Path (Get-Location) "agy\log\serial_telemetry.log"
-if (-not (Test-Path (Split-Path $LogPath))) {
-    New-Item -ItemType Directory -Path (Split-Path $LogPath) -Force | Out-Null
+$LogDir = Join-Path (Get-Location) "agy\log"
+if (-not (Test-Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
 }
-Write-Host "[*] Logging to file : $LogPath" -ForegroundColor Yellow
+
+$StartDt = Get-Date
+$BaseTs = $StartDt.ToString("yyMMdd_HHmmss")
+$Seq = 1
+do {
+    $SessionFileName = "serial_telemetry_${BaseTs}_$(("{0:D3}" -f $Seq)).log"
+    $SessionLogPath = Join-Path $LogDir $SessionFileName
+    $Seq++
+} while (Test-Path $SessionLogPath)
+
+$MasterLogPath = Join-Path $LogDir "serial_telemetry.log"
+Write-Host "[*] Session Log     : $SessionFileName" -ForegroundColor Yellow
+
+$Header = @"
+==========================================================
+Arduino26 Telemetry Log Started: $($StartDt.ToString("yyyy-MM-dd HH:mm:ss K"))
+Target Port : $Port | Baud Rate: $Baud
+Log File    : $SessionFileName
+==========================================================
+"@
+
+Add-Content -Path $SessionLogPath -Value $Header -Encoding UTF8
+Add-Content -Path $MasterLogPath -Value $Header -Encoding UTF8
+
+$LineCount = 0
 
 try {
     while ($sp.IsOpen) {
         try {
             $line = $sp.ReadLine()
             if ($line) {
-                $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-                $entry = "[$ts] $line"
+                $LineCount++
+                $Now = Get-Date
+                $ElapsedSec = [int]($Now - $StartDt).TotalSeconds
+                $Hours = [math]::Floor($ElapsedSec / 3600)
+                $Minutes = [math]::Floor(($ElapsedSec % 3600) / 60)
+                $Seconds = $ElapsedSec % 60
+                $DatePrefix = $Now.ToString("yyMMdd")
+                $TimePrefix = "+$(("{0:D2}" -f $Hours)):$(("{0:D2}" -f $Minutes)):$(("{0:D2}" -f $Seconds))"
+                
+                $entry = "[$DatePrefix $TimePrefix] $line"
                 Write-Host $entry -ForegroundColor White
-                Add-Content -Path $LogPath -Value $entry -Encoding UTF8
+                Add-Content -Path $SessionLogPath -Value $entry -Encoding UTF8
+                Add-Content -Path $MasterLogPath -Value $entry -Encoding UTF8
             }
         } catch [TimeoutException] {
             # Timeout is expected when no data arrives
         }
     }
 } finally {
+    $EndDt = Get-Date
+    $DurationSec = [int]($EndDt - $StartDt).TotalSeconds
+    $DH = [math]::Floor($DurationSec / 3600)
+    $DM = [math]::Floor(($DurationSec % 3600) / 60)
+    $DS = $DurationSec % 60
+    $DurStr = "$(("{0:D2}" -f $DH)):$(("{0:D2}" -f $DM)):$(("{0:D2}" -f $DS))"
+
+    $Footer = @"
+==========================================================
+Arduino26 Telemetry Log Ended: $($EndDt.ToString("yyyy-MM-dd HH:mm:ss K"))
+Duration     : $DurStr | Total Lines: $LineCount
+==========================================================
+"@
+    Add-Content -Path $SessionLogPath -Value $Footer -Encoding UTF8
+    Add-Content -Path $MasterLogPath -Value $Footer -Encoding UTF8
+
     if ($sp.IsOpen) {
         $sp.Close()
         Write-Host "[*] Serial port $Port closed cleanly." -ForegroundColor Yellow

@@ -93,6 +93,9 @@ workflows, and repository hygiene for all assistants operating within the
 - **STRICT NO UNVERIFIED CURL PIPING:** NEVER pipe `curl` or `wget` downloads directly
   into `sh` or `bash` (`curl ... | sh`). Always download to an explicit temporary file,
   verify download completion, or use official package managers (`apt`, `uv`, `pip`, `winget`).
+- **STRICT NO OVERWRITE / NO FILE COLLISION DIRECTIVE:** Everything that opens or creates
+  a log, telemetry, or output file MUST NOT step on existing contents. Always append (`a` mode)
+  or create a new collision-free timestamped file (`filename_YYMMDD_HHMMSS_nnn.ext`).
 - **Empirical Verification Required:** NEVER declare success without running
   empirical build/test verification commands (e.g. `arduino-cli compile`,
   `python3 tools/...`, `make`).
