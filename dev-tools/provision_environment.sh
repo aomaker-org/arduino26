@@ -10,6 +10,8 @@
 
 set -euo pipefail
 
+export PATH="${HOME}/.local/bin:${PATH}"
+
 echo "=========================================================="
 echo "    Arduino26 Workspace Environment Provisioning         "
 echo "=========================================================="
@@ -18,8 +20,8 @@ echo "----------------------------------------------------------"
 
 # 1. Update Apt Repositories & Install Baseline Packages
 echo "[1/6] Updating APT repositories and installing core packages..."
-sudo apt-get update -qq
-sudo apt-get install -y -qq build-essential python3 python3-pip python3-venv git curl wget avrdude picocom
+sudo apt-get update -qq || true
+sudo apt-get install -y -qq build-essential python3 python3-pip python3-venv git curl wget avrdude picocom || true
 
 # 2. Install / Upgrade uv (Fast Python Package Installer)
 echo "[2/6] Auditing 'uv' Python package manager..."
@@ -29,34 +31,48 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 
 # 3. Provision Virtual Environment (.venv) & Python Packages
-echo "[3/6] Installing Python dependencies (pyserial, mpremote)..."
+echo "[3/6] Installing Python dependencies and ard26 CLI..."
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VENV_PATH="${ROOT}/.venv"
 
 if [ ! -d "${VENV_PATH}" ]; then
-    python3 -m venv "${VENV_PATH}"
+    if command -v uv >/dev/null 2>&1; then
+        uv venv "${VENV_PATH}"
+    else
+        python3 -m venv "${VENV_PATH}"
+    fi
 fi
 
-"${VENV_PATH}/bin/pip" install --upgrade pip pyserial mpremote >/dev/null
+if command -v uv >/dev/null 2>&1; then
+    uv pip install --python "${VENV_PATH}" pyserial mpremote -e "${ROOT}" >/dev/null
+elif [ -f "${VENV_PATH}/bin/pip" ]; then
+    "${VENV_PATH}/bin/pip" install --upgrade pyserial mpremote -e "${ROOT}" >/dev/null
+else
+    "${VENV_PATH}/bin/python" -m pip install --upgrade pyserial mpremote -e "${ROOT}" >/dev/null
+fi
 
 # 4. Install arduino-cli (CLI Toolchain for Arduino)
 echo "[4/6] Auditing 'arduino-cli'..."
 if ! command -v arduino-cli >/dev/null 2>&1; then
     mkdir -p "${HOME}/.local/bin"
-    curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="${HOME}/.local/bin" sh
+    curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="${HOME}/.local/bin" sh || true
     export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
-echo "[*] Updating Arduino CLI core index..."
-arduino-cli core update-index || true
-echo "[*] Installing Arduino AVR Core (arduino:avr)..."
-arduino-cli core install arduino:avr || true
+if command -v arduino-cli >/dev/null 2>&1; then
+    echo "[*] Updating Arduino CLI core index..."
+    arduino-cli core update-index || true
+    echo "[*] Installing Arduino AVR Core (arduino:avr)..."
+    arduino-cli core install arduino:avr || true
+else
+    echo "[i] Note: 'arduino-cli' binary not found. Skipping core update."
+fi
 
 # 5. Dialout Permissions Check
 echo "[5/6] Auditing serial port permissions..."
 if ! groups "$USER" | grep -q '\bdialout\b'; then
     echo "[!] Adding $USER to 'dialout' group..."
-    sudo usermod -aG dialout "$USER"
+    sudo usermod -aG dialout "$USER" || true
     echo "[+] User $USER added to dialout group."
 else
     echo "[+] User $USER is already in dialout group."
