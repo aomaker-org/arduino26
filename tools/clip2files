@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# ==============================================================================
+# Filename:     tools/clip2files
+# Purpose:      Multi-file manifest extraction from clipboard or stdin stream
+# Target OS:    Ubuntu 24.04 / 26.04 LTS / WSL2 / Linux Native
+# Lineage:      Arduino26 Infrastructure
+# Updated:      2026-07-31
+# Attribution:  fekerr & Gemini
+# ==============================================================================
+
+import sys
+import re
+import hashlib
+import subprocess
+from pathlib import Path
+
+def harvest_stream() -> str:
+    """Intercepts incoming text stream from stdin pipe or host clipboard."""
+    if not sys.stdin.isatty():
+        return sys.stdin.read()
+    
+    # WSL / Windows clipboard extraction via PowerShell
+    try:
+        proc = subprocess.run(
+            ["powershell.exe", "-NoProfile", "-Command", "Get-Clipboard"],
+            capture_output=True, text=True, check=True
+        )
+        return proc.stdout
+    except Exception:
+        try:
+            # Linux xclip / wl-paste fallback
+            proc = subprocess.run(["xclip", "-selection", "clipboard", "-o"], capture_output=True, text=True, check=True)
+            return proc.stdout
+        except Exception as e:
+            print(f"[X] Host Bridge Fault: Unable to intercept clipboard context: {e}")
+            sys.exit(1)
+
+def main():
+    raw_data = harvest_stream()
+    
+    pattern = re.compile(
+        r"--- BEGIN FILE:\s*(\S+?)\s*(?:\|\s*Size:\s*(\d+)\s*bytes\s*)?(?:\|\s*SHA256:\s*(\S+)\s*)?---\n(.*?)\n--- END FILE:\s*\1\s*---",
+        re.DOTALL
+    )
+    
+    matches = pattern.findall(raw_data)
+    if not matches:
+        print("[!] Validation Halt: Zero structured file manifest boundaries found in stream.")
+        sys.exit(0)
+        
+    print(f"[+] Discovered {len(matches)} valid target nodes.")
+    
+    for path_str, exp_size, exp_hash, content in matches:
+        target_path = Path(path_str.strip())
+        
+        clean_content = content.replace('\r\n', '\n')
+        actual_bytes = len(clean_content.encode('utf-8'))
+        computed_hash = hashlib.sha256(clean_content.encode('utf-8')).hexdigest()
+        
+        print(f"\n[*] Processing Asset Node: {target_path}")
+        print(f"    |-- Size: {actual_bytes} bytes | SHA256: {computed_hash[:16]}...")
+        
+        if exp_size:
+            expected_bytes = int(exp_size)
+            if actual_bytes != expected_bytes:
+                print(f"    [!] WARNING: Size discrepancy! Expected: {expected_bytes} | Got: {actual_bytes}")
+            else:
+                print("    |-- [PASS] Payload size validation cleared.")
+                
+        if exp_hash:
+            hash_str = exp_hash.strip()
+            if hash_str.upper() == "TODO":
+                print("    |-- [TODO] Cryptographic signature bypass enabled.")
+            elif computed_hash != hash_str.lower():
+                print(f"    [!] REGRESSION: Checksum mismatch!\n        Expected: {hash_str}\n        Computed: {computed_hash}")
+            else:
+                print("    |-- [PASS] SHA256 cryptographic signature validated.")
+                
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        target_path.write_text(clean_content + "\n", encoding="utf-8")
+        print(f"    \\---- [SUCCESS] Asset written to disk: {target_path}")
+
+if __name__ == "__main__":
+    main()

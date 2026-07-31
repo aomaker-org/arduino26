@@ -1,0 +1,105 @@
+# Arduino26: Embedded Systems & Multi-Agent AI Development Environment
+<!-- file: README.md -->
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](file:///home/fekerr/src/arduino26/LICENSE)
+[![Target OS](https://img.shields.io/badge/OS-WSL2%20Ubuntu%2026.04-orange.svg)](file:///home/fekerr/src/arduino26/config_env)
+[![Toolchain](https://img.shields.io/badge/Toolchain-arduino--cli%20%7C%20avr--gcc%20%7C%20Rust%20%7C%20MicroPython-green.svg)](file:///home/fekerr/src/arduino26/docs/ARDUINO_ENVIRONMENTS.md)
+
+Welcome to **Arduino26** — a multi-agent AI-assisted development workspace tailored
+for Arduino, microcontrollers, and bare metal embedded systems engineering inside
+WSL2 Ubuntu 26 bash with Windows 11 host interop.
+
+---
+
+## ⚡ Concise Getting Started (For Experienced Embedded Engineers)
+
+### Environment Bootstrap
+Source the environment script to activate Python `.venv`, add path aliases, and
+configure interactive prompt tagging:
+
+```bash
+source config_env
+```
+
+### Hardware Passthrough (WSL2 USB Attachment via `usbipd`)
+For Arduino Uno clones using the CH340, FT232, or CP210x USB-to-Serial bridge:
+
+1. List host USB devices from WSL:
+   ```bash
+   pwsh.exe -Command "usbipd list"
+   ```
+2. Attach the USB device to WSL2 (run in Windows PowerShell or via `pwsh.exe`):
+   ```bash
+   pwsh.exe -Command "usbipd attach --wsl --busid <BUSID>"
+   ```
+3. Audit serial port status inside WSL2:
+   ```bash
+   arduino_scan   # or: python3 tools/arduino_serial_bridge.py
+   ```
+
+### Quick Build & Flash Commands
+- **Arduino C++ (`arduino-cli`):**
+  ```bash
+  arduino-cli compile --fqbn arduino:avr:uno sketches/uno_blink
+  arduino-cli upload -p /dev/ttyUSB0 --fqbn arduino:avr:uno sketches/uno_blink
+  ```
+- **AVR Assembly Bare Metal:**
+  ```bash
+  cd asm/uno_blink && make PORT=/dev/ttyUSB0 flash
+  ```
+- **Rust (`arduino-hal`):**
+  ```bash
+  cd rust/uno_blink && cargo build --release
+  ```
+- **MicroPython:**
+  ```bash
+  mpremote connect /dev/ttyUSB0 run micropython/main.py
+  ```
+
+---
+
+## 📂 Repository Layout
+
+```
+arduino26/
+├── AI.md                         # Authoritative AI Directives & Guardrails
+├── LICENSE                       # MIT FOSS License
+├── config_env                    # Sourced bash environment loader
+├── agy/                          # AI Multi-Agent Interop & Logging
+│   ├── inbox/                    # Inbound prompt & directive files
+│   ├── outbox/                   # Outbound turn status reports
+│   ├── log/                      # Forensic prompt/response logs & serial telemetry
+│   └── scratch/                  # Overflow context bundles (> 250 KB)
+├── tools/                        # Utility scripts
+│   ├── files2clip                # Pack workspace assets into clipboard for LLMs
+│   ├── clip2files                # Unpack clipboard context manifests into files
+│   ├── patch_io.py               # Input/Output bridge wrapper
+│   └── arduino_serial_bridge.py  # Hardware scanner, Win11 PnP query & USB bridge
+├── sketches/                     # Arduino C++ sketch projects
+│   └── uno_blink/                # Standard Uno blink sketch (.ino)
+├── asm/                          # Bare metal AVR Assembly projects
+│   └── uno_blink/                # AVR assembly source & Makefile
+├── rust/                         # Bare metal Rust projects
+│   └── uno_blink/                # Rust cargo project (arduino-hal / no_std)
+├── micropython/                  # MicroPython / CircuitPython scripts
+└── docs/                         # Detailed documentation suite
+    ├── GETTING_STARTED.md        # Fast-track guide for computer/embedded engineers
+    ├── ARDUINO_ENVIRONMENTS.md   # Deep dive into C++, Assembly, Rust, & MicroPython
+    ├── WSL_WIN11_HARDWARE.md     # CH340 driver, usbipd, and Win11 callouts
+    ├── AGY_CONTEXT_INTEROP.md    # Multi-agent AI inbox/outbox & clipboard workflow
+    └── LICENSING.md              # FOSS options (MIT, Apache 2.0, Unlicense, GPL)
+```
+
+---
+
+## 📚 Verbose Documentation & Reference Index
+
+For full setup guides, datasheets, toolchain installation, and web resources:
+
+1. 🚀 [Getting Started Guide](file:///home/fekerr/src/arduino26/docs/GETTING_STARTED.md)
+2. 🛠️ [Arduino Development Environments Guide](file:///home/fekerr/src/arduino26/docs/ARDUINO_ENVIRONMENTS.md)
+3. 🔌 [WSL2 & Windows 11 Hardware Passthrough Guide](file:///home/fekerr/src/arduino26/docs/WSL_WIN11_HARDWARE.md)
+4. 🤖 [AGY Multi-Agent AI Workflow Guide](file:///home/fekerr/src/arduino26/docs/AGY_CONTEXT_INTEROP.md)
+5. ⚖️ [FOSS Licensing Documentation](file:///home/fekerr/src/arduino26/docs/LICENSING.md)
+
+<!-- file README.md ends -->

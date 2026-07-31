@@ -1,0 +1,23 @@
+# file: rust/uno_blink/Cargo.toml
+[package]
+name = "uno_blink"
+version = "0.1.0"
+authors = ["fekerr"]
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+arduino-hal = "0.1.0"
+panic-halt = "0.2.0"
+
+[profile.dev]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+[profile.release]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+# file rust/uno_blink/Cargo.toml ends

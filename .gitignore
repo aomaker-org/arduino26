@@ -1,0 +1,45 @@
+# Build & Output Directories
+/build/
+/dist/
+/out/
+*.hex
+*.elf
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.bin
+
+# Python / Virtual Environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# AGY Transient Buffers & Logs
+/agy/inbox/*
+!/agy/inbox/.gitkeep
+!/agy/inbox/archive/
+/agy/outbox/*
+!/agy/outbox/.gitkeep
+!/agy/outbox/archive/
+/agy/log/*
+!/agy/log/.gitkeep
+/agy/scratch/*
+!/agy/scratch/.gitkeep
+scratch/*
+
+# IDE and System Files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Arduino / Rust / Cargo transient files
+/rust/uno_blink/target/
+*.user
+*.suo

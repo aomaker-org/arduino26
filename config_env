@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Path:        config_env
+# Purpose:     Idempotent WSL2/Ubuntu environment loader for Arduino26
+#              Hardware/Serial Toolchain, AGY interop, and CLI utilities.
+# Target OS:   Ubuntu 24.04 / 26.04 LTS (WSL2 / Linux Native)
+# Type:        Sourced Script (Execute via 'source config_env' or '. config_env')
+# Lineage:     Arduino26 Infrastructure (Derived & Simplified from irislime)
+# Updated:     2026-07-31
+# ==============================================================================
+
+# 1. Guard: Prevent direct subshell execution without killing the active terminal
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "[!] ERROR: You must SOURCE this file, not execute it." >&2
+    echo "    Usage: source config_env [force|unset|<prompt_tag>]" >&2
+    return 1 2>/dev/null || exit 1
+fi
+
+# 2. Intercept and Parse Input Parameters
+LOCAL_TAG=""
+if [ "${1:-}" == "force" ] || [ "${1:-}" == "--force" ]; then
+    echo "[!] Force reload detected. Cycling environment state..."
+    unset ARDUINO26_READY
+    LOCAL_TAG="${2:-}"
+elif [ "${1:-}" == "unset" ]; then
+    echo "[!] Unsetting Arduino26 environment..."
+    unset ARDUINO26_READY
+    unset ARDUINO26_ROOT
+    unset ARDUINO26_RUN_TYPE
+    unset ARDUINO_DEFAULT_PORT
+    unset ARDUINO_DEFAULT_FQBN
+    
+    # Remove custom functions and aliases
+    unset -f pto pti 2>/dev/null
+    unalias files2clip clip2files pack2clip patch_incoming arduino_bridge arduino_scan 2>/dev/null
+    
+    if command -v deactivate >/dev/null 2>&1; then
+        deactivate 2>/dev/null || true
+        echo "[+] Virtual environment deactivated."
+    fi
+    echo "[+] Arduino26 environment unset."
+    return 0
+elif [ -n "${1:-}" ]; then
+    LOCAL_TAG="$1"
+fi
+
+# 3. Process Runtime Tag Assertions
+if [ -n "${LOCAL_TAG}" ]; then
+    export ARDUINO26_RUN_TYPE="${LOCAL_TAG}"
+    echo "[+] Prompt run-type tag locked to: [${ARDUINO26_RUN_TYPE}]"
+elif [ -z "${ARDUINO26_RUN_TYPE:-}" ]; then
+    echo "[i] Tip: To tag your prompt context, try: source config_env \"my_tag\""
+else
+    echo "[+] Retaining active prompt tag exception: [${ARDUINO26_RUN_TYPE}]"
+fi
+
+# 4. Idempotency Check
+if [ -n "${ARDUINO26_READY:-}" ]; then
+    echo "[!] Arduino26 environment is already loaded. Use 'source config_env force' to re-verify."
+    return 0
+fi
+
+# 5. Export Workspace Root & Virtual Environment Setup
+export ARDUINO26_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_PATH="${ARDUINO26_ROOT}/.venv"
+
+if [ -f "${VENV_PATH}/bin/activate" ]; then
+    if [[ "${VIRTUAL_ENV:-}" != "" ]]; then
+        deactivate >/dev/null 2>&1 || unset VIRTUAL_ENV
+    fi
+    source "${VENV_PATH}/bin/activate"
+    echo "[+] Virtual environment activated (${VENV_PATH})."
+elif command -v uv >/dev/null 2>&1; then
+    echo "[*] Creating local virtual environment via uv..."
+    uv venv "${VENV_PATH}"
+    source "${VENV_PATH}/bin/activate"
+    if [ -f "${ARDUINO26_ROOT}/pyproject.toml" ]; then
+        uv sync 2>/dev/null || true
+    fi
+elif command -v python3 >/dev/null 2>&1; then
+    echo "[*] Creating local virtual environment via python3 venv..."
+    python3 -m venv "${VENV_PATH}"
+    source "${VENV_PATH}/bin/activate"
+fi
+
+# 6. Hardware & Arduino Defaults Configuration
+export ARDUINO_DEFAULT_PORT="${ARDUINO_DEFAULT_PORT:-/dev/ttyACM0}"
+export ARDUINO_DEFAULT_FQBN="${ARDUINO_DEFAULT_FQBN:-arduino:avr:uno}"
+
+# 7. Interactive Prompt Customization
+if [[ $- == *i* ]]; then
+    export PS1='\[\e]0;\u@\h: \w\a\]\n\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;36m\][arduino26${ARDUINO26_RUN_TYPE:+:$ARDUINO26_RUN_TYPE}]\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\] \[\033[01;33m\]\D{%y%m_%H%M}_\!\[\033[00m\]\n; '
+fi
+
+# 8. Aliases and Syntactic Sugar
+alias files2clip="python3 ${ARDUINO26_ROOT}/tools/files2clip"
+alias clip2files="python3 ${ARDUINO26_ROOT}/tools/clip2files"
+pto() { python3 "${ARDUINO26_ROOT}/tools/patch_io.py" out "$@"; }
+pti() { python3 "${ARDUINO26_ROOT}/tools/patch_io.py" in "$@"; }
+alias pack2clip=pto
+alias patch_incoming=pti
+alias arduino_bridge="python3 ${ARDUINO26_ROOT}/tools/arduino_serial_bridge.py"
+alias arduino_scan="python3 ${ARDUINO26_ROOT}/tools/arduino_serial_bridge.py"
+
+export ARDUINO26_READY=1
+echo "[+] Arduino26 environment loaded successfully (Root: ${ARDUINO26_ROOT})."
