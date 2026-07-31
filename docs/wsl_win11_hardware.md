@@ -1,5 +1,5 @@
 # WSL2 & Windows 11 Hardware Passthrough Guide (Verbose Reference)
-<!-- file: docs/WSL_WIN11_HARDWARE.md -->
+<!-- file: docs/wsl_win11_hardware.md -->
 
 This guide documents how WSL2 Ubuntu 26 interoperates with physical USB devices plugged
 into a Windows 11 host system, with specific focus on CH340 USB-to-Serial bridge chips
@@ -105,4 +105,4 @@ cmd.exe /c start "" "C:\Program Files\Arduino IDE\Arduino IDE.exe"
   Ensure no serial monitors (e.g. Windows Serial Monitor, `picocom`, `minicom`, or `mpremote`)
   are actively keeping `/dev/ttyUSB0` or `COM3` open during an `arduino-cli upload` cycle.
 
-<!-- file docs/WSL_WIN11_HARDWARE.md ends -->
+<!-- file docs/wsl_win11_hardware.md ends -->

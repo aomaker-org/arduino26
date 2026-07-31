@@ -1,5 +1,5 @@
-# Licensing Options & Open Source Philosophy (LICENSING.md)
-<!-- file: docs/LICENSING.md -->
+# Licensing Options & Open Source Philosophy (licensing.md)
+<!-- file: docs/licensing.md -->
 
 ## Aggressively Free and Open Source Software (FOSS)
 
@@ -46,4 +46,4 @@ or dual-license under any of the following standard FOSS licenses:
   // SPDX-License-Identifier: MIT
   ```
 
-<!-- file docs/LICENSING.md ends -->
+<!-- file docs/licensing.md ends -->

@@ -3,7 +3,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](file:///home/fekerr/src/arduino26/LICENSE)
 [![Target OS](https://img.shields.io/badge/OS-WSL2%20Ubuntu%2026.04-orange.svg)](file:///home/fekerr/src/arduino26/config_env)
-[![Toolchain](https://img.shields.io/badge/Toolchain-arduino--cli%20%7C%20avr--gcc%20%7C%20Rust%20%7C%20MicroPython-green.svg)](file:///home/fekerr/src/arduino26/docs/ARDUINO_ENVIRONMENTS.md)
+[![Toolchain](https://img.shields.io/badge/Toolchain-arduino--cli%20%7C%20avr--gcc%20%7C%20Rust%20%7C%20MicroPython-green.svg)](file:///home/fekerr/src/arduino26/docs/arduino_environments.md)
 
 Welcome to **Arduino26** — a multi-agent AI-assisted development workspace tailored
 for Arduino, microcontrollers, and bare metal embedded systems engineering inside
@@ -85,12 +85,12 @@ arduino26/
 │   └── uno_blink/                # Rust cargo project (arduino-hal / no_std)
 ├── micropython/                  # MicroPython / CircuitPython scripts
 └── docs/                         # Detailed documentation suite
-    ├── GETTING_STARTED.md        # Fast-track guide for computer/embedded engineers
-    ├── CLI_UPLOADING.md          # Comprehensive CLI upload guide (arduino-cli & avrdude)
-    ├── ARDUINO_ENVIRONMENTS.md   # Deep dive into C++, Assembly, Rust, & MicroPython
-    ├── WSL_WIN11_HARDWARE.md     # CH340 driver, usbipd, and Win11 callouts
-    ├── AGY_CONTEXT_INTEROP.md    # Multi-agent AI inbox/outbox & clipboard workflow
-    └── LICENSING.md              # FOSS options (MIT, Apache 2.0, Unlicense, GPL)
+    ├── getting_started.md        # Fast-track guide for computer/embedded engineers
+    ├── cli_uploading.md          # Comprehensive CLI upload guide (arduino-cli & avrdude)
+    ├── arduino_environments.md   # Deep dive into C++, Assembly, Rust, & MicroPython
+    ├── wsl_win11_hardware.md     # CH340 driver, usbipd, and Win11 callouts
+    ├── agy_context_interop.md    # Multi-agent AI inbox/outbox & clipboard workflow
+    └── licensing.md              # FOSS options (MIT, Apache 2.0, Unlicense, GPL)
 ```
 
 ---
@@ -99,11 +99,11 @@ arduino26/
 
 For full setup guides, datasheets, toolchain installation, and web resources:
 
-1. 🚀 [Getting Started Guide](file:///home/fekerr/src/arduino26/docs/GETTING_STARTED.md)
-2. ⚡ [CLI Sketch Uploading Guide](file:///home/fekerr/src/arduino26/docs/CLI_UPLOADING.md)
-3. 🛠️ [Arduino Development Environments Guide](file:///home/fekerr/src/arduino26/docs/ARDUINO_ENVIRONMENTS.md)
-4. 🔌 [WSL2 & Windows 11 Hardware Passthrough Guide](file:///home/fekerr/src/arduino26/docs/WSL_WIN11_HARDWARE.md)
-5. 🤖 [AGY Multi-Agent AI Workflow Guide](file:///home/fekerr/src/arduino26/docs/AGY_CONTEXT_INTEROP.md)
-6. ⚖️ [FOSS Licensing Documentation](file:///home/fekerr/src/arduino26/docs/LICENSING.md)
+1. 🚀 [Getting Started Guide](file:///home/fekerr/src/arduino26/docs/getting_started.md)
+2. ⚡ [CLI Sketch Uploading Guide](file:///home/fekerr/src/arduino26/docs/cli_uploading.md)
+3. 🛠️ [Arduino Development Environments Guide](file:///home/fekerr/src/arduino26/docs/arduino_environments.md)
+4. 🔌 [WSL2 & Windows 11 Hardware Passthrough Guide](file:///home/fekerr/src/arduino26/docs/wsl_win11_hardware.md)
+5. 🤖 [AGY Multi-Agent AI Workflow Guide](file:///home/fekerr/src/arduino26/docs/agy_context_interop.md)
+6. ⚖️ [FOSS Licensing Documentation](file:///home/fekerr/src/arduino26/docs/licensing.md)
 
 <!-- file README.md ends -->

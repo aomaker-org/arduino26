@@ -1,5 +1,5 @@
 # Arduino Development Environments Guide (Verbose Reference)
-<!-- file: docs/ARDUINO_ENVIRONMENTS.md -->
+<!-- file: docs/arduino_environments.md -->
 
 This document provides a deep, technical exploration of the four primary software
 environments supported in `arduino26` for target microcontrollers (starting with the
@@ -166,4 +166,4 @@ make PORT=/dev/ttyUSB0 flash
 - 🐍 [MicroPython Official Documentation](https://docs.micropython.org/)
 - ⚡ [usbipd-win Project (GitHub)](https://github.com/dorssel/usbipd-win)
 
-<!-- file docs/ARDUINO_ENVIRONMENTS.md ends -->
+<!-- file docs/arduino_environments.md ends -->

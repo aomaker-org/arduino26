@@ -1,5 +1,5 @@
 # How to Upload Arduino Sketches via Command Line (CLI)
-<!-- file: docs/CLI_UPLOADING.md -->
+<!-- file: docs/cli_uploading.md -->
 
 This guide documents CLI workflows for compiling and flashing code to Arduino microcontrollers (starting with Uno clones based on the ATmega328P and CH340 USB-to-Serial converter) inside WSL2 Ubuntu 26.
 
@@ -172,4 +172,4 @@ ravedude uno -P /dev/ttyUSB0 target/avr-atmega328p/release/uno_blink.elf
 - 📖 [AVRDUDE Official Documentation](https://www.nongnu.org/avrdude/user-manual/avrdude.html)
 - 📄 [Optiboot Bootloader GitHub Repository](https://github.com/Optiboot/optiboot)
 
-<!-- file docs/CLI_UPLOADING.md ends -->
+<!-- file docs/cli_uploading.md ends -->

@@ -1,5 +1,5 @@
 # Multi-Agent AI Collaboration & AGY Interop Specification
-<!-- file: docs/AGY_CONTEXT_INTEROP.md -->
+<!-- file: docs/agy_context_interop.md -->
 
 This document details the multi-agent AI workflow, context exchange architecture, and
 inbox/outbox protocols used in `arduino26` to coordinate between CLI agents (AGY), Web UI models
@@ -110,4 +110,4 @@ On every execution turn or milestone, AI agents MUST generate a turn status repo
 
 Turn reports are subsequently archived to `agy/outbox/archive/` and set read-only (`chmod 444`).
 
-<!-- file docs/AGY_CONTEXT_INTEROP.md ends -->
+<!-- file docs/agy_context_interop.md ends -->

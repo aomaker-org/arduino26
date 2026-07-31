@@ -1,5 +1,5 @@
 # Getting Started with Arduino26 (Concise Summary)
-<!-- file: docs/GETTING_STARTED.md -->
+<!-- file: docs/getting_started.md -->
 
 > **Target Audience:** Experienced Embedded Systems Engineers, Computer Engineers,
 > and Firmware Developers. High-signal, low-fluff reference.
@@ -91,4 +91,4 @@ sudo usermod -aG dialout $USER
   ls -l agy/log/
   ```
 
-<!-- file docs/GETTING_STARTED.md ends -->
+<!-- file docs/getting_started.md ends -->
