@@ -7,13 +7,14 @@ import sys
 import argparse
 import subprocess
 import time
+from typing import Optional
 from pathlib import Path
-
 import shutil
 
 from ard26_cli.config import Config
 from ard26_cli.detector import DeviceDetector
 from ard26_cli.logger import OperationLogger
+from ard26_cli.telemetry import TelemetryLogger
 
 try:
     import serial
