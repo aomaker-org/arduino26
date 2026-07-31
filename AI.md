@@ -75,6 +75,8 @@ workflows, and repository hygiene for all assistants operating within the
   (hard max of 120 columns) for clean terminal rendering and diffs.
 - **Source Code:** Standard formatting per language, keeping lines within 80–120
   columns where practical.
+- **Single-Line Copy-Paste Commands:** Format terminal commands on their own isolated
+  single-line code blocks so users can easily triple-click to select and copy without line breaks.
 - **Mandatory File Headers & Footers:**
   - Header: Every text file must begin with a comment specifying the file path:
     `<!-- file: relative/path/filename -->` or `# file: relative/path/filename`.
