@@ -75,6 +75,7 @@ arduino26/
 │   ├── clip2files                # Unpack clipboard context manifests into files
 │   ├── patch_io.py               # Input/Output bridge wrapper
 │   ├── upload_sketch.sh          # CLI compilation & sketch upload helper
+│   ├── serial_monitor.py         # Python interactive serial monitor & logger
 │   └── arduino_serial_bridge.py  # Hardware scanner, Win11 PnP query & USB bridge
 ├── sketches/                     # Arduino C++ sketch projects
 │   ├── uno_blink/                # Standard Uno blink sketch (.ino)
@@ -89,6 +90,7 @@ arduino26/
 └── docs/                         # Detailed documentation suite
     ├── getting_started.md        # Fast-track guide for computer/embedded engineers
     ├── cli_uploading.md          # Comprehensive CLI upload guide (arduino-cli & avrdude)
+    ├── serial_io_methods.md      # Serial I/O methods (Python scripts, CLI monitors, bash)
     ├── arduino_environments.md   # Deep dive into C++, Assembly, Rust, & MicroPython
     ├── wsl_win11_hardware.md     # CH340 driver, usbipd, and Win11 callouts
     ├── agy_context_interop.md    # Multi-agent AI inbox/outbox & clipboard workflow
@@ -103,9 +105,10 @@ For full setup guides, datasheets, toolchain installation, and web resources:
 
 1. 🚀 [Getting Started Guide](file:///home/fekerr/src/arduino26/docs/getting_started.md)
 2. ⚡ [CLI Sketch Uploading Guide](file:///home/fekerr/src/arduino26/docs/cli_uploading.md)
-3. 🛠️ [Arduino Development Environments Guide](file:///home/fekerr/src/arduino26/docs/arduino_environments.md)
-4. 🔌 [WSL2 & Windows 11 Hardware Passthrough Guide](file:///home/fekerr/src/arduino26/docs/wsl_win11_hardware.md)
-5. 🤖 [AGY Multi-Agent AI Workflow Guide](file:///home/fekerr/src/arduino26/docs/agy_context_interop.md)
-6. ⚖️ [FOSS Licensing Documentation](file:///home/fekerr/src/arduino26/docs/licensing.md)
+3. 📡 [Serial I/O Methods & Python Workflows](file:///home/fekerr/src/arduino26/docs/serial_io_methods.md)
+4. 🛠️ [Arduino Development Environments Guide](file:///home/fekerr/src/arduino26/docs/arduino_environments.md)
+5. 🔌 [WSL2 & Windows 11 Hardware Passthrough Guide](file:///home/fekerr/src/arduino26/docs/wsl_win11_hardware.md)
+6. 🤖 [AGY Multi-Agent AI Workflow Guide](file:///home/fekerr/src/arduino26/docs/agy_context_interop.md)
+7. ⚖️ [FOSS Licensing Documentation](file:///home/fekerr/src/arduino26/docs/licensing.md)
 
 <!-- file README.md ends -->
