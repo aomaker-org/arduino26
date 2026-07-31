@@ -209,16 +209,18 @@ def cmd_upload(args, cfg: Config):
 
 
 def cmd_monitor(args, cfg: Config):
-    """Launches interactive serial monitor with UTF-8 decoding."""
+    """Launches interactive serial monitor with UTF-8 decoding and telemetry file logging."""
     logger = OperationLogger(cfg.root_dir)
     port = DeviceDetector.resolve_port(args.port or cfg.preferred_port, cfg.port_wsl)
     baud = args.baud or cfg.baud_default
+    telemetry_log = cfg.root_dir / "agy" / "log" / "serial_telemetry.log"
 
     print(f"==========================================================")
     print(f"    Arduino26 Unified Serial Monitor                      ")
     print(f"==========================================================")
     print(f"[*] Target Port : {port}")
     print(f"[*] Baud Rate   : {baud}")
+    print(f"[*] Telemetry   : {telemetry_log}")
     print(f"[*] Exit        : Press Ctrl+C to disconnect")
     print(f"----------------------------------------------------------")
     logger.log_operation("monitor", "N/A", port, "STARTED", 0)
@@ -239,14 +241,18 @@ def cmd_monitor(args, cfg: Config):
 
     try:
         ser = serial.Serial(port, baud, timeout=1.0)
-        print(f"[+] Connected to {port} at {baud} baud (UTF-8).")
-        while ser.is_open:
-            if ser.in_waiting > 0:
-                line = ser.readline().decode("utf-8", errors="ignore").strip()
-                if line:
-                    ts = time.strftime("%Y-%m-%d %H:%M:%S")
-                    print(f"[{ts}] {line}")
-            time.sleep(0.01)
+        print(f"[+] Connected to {port} at {baud} baud (UTF-8). Logging to file...")
+        with open(telemetry_log, "a", encoding="utf-8") as f_log:
+            while ser.is_open:
+                if ser.in_waiting > 0:
+                    line = ser.readline().decode("utf-8", errors="ignore").strip()
+                    if line:
+                        ts = time.strftime("%Y-%m-%d %H:%M:%S")
+                        log_entry = f"[{ts}] {line}"
+                        print(log_entry)
+                        f_log.write(log_entry + "\n")
+                        f_log.flush()
+                time.sleep(0.01)
     except KeyboardInterrupt:
         print(f"\n[*] Disconnected from {port}.")
     except Exception as e:

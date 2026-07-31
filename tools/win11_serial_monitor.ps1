@@ -31,13 +31,21 @@ try {
     exit 1
 }
 
+$LogPath = Join-Path (Get-Location) "agy\log\serial_telemetry.log"
+if (-not (Test-Path (Split-Path $LogPath))) {
+    New-Item -ItemType Directory -Path (Split-Path $LogPath) -Force | Out-Null
+}
+Write-Host "[*] Logging to file : $LogPath" -ForegroundColor Yellow
+
 try {
     while ($sp.IsOpen) {
         try {
             $line = $sp.ReadLine()
             if ($line) {
                 $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-                Write-Host "[$ts] $line" -ForegroundColor White
+                $entry = "[$ts] $line"
+                Write-Host $entry -ForegroundColor White
+                Add-Content -Path $LogPath -Value $entry -Encoding UTF8
             }
         } catch [TimeoutException] {
             # Timeout is expected when no data arrives
