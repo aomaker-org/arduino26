@@ -101,6 +101,8 @@ alias pack2clip=pto
 alias patch_incoming=pti
 alias arduino_bridge="python3 ${ARDUINO26_ROOT}/tools/arduino_serial_bridge.py"
 alias arduino_scan="python3 ${ARDUINO26_ROOT}/tools/arduino_serial_bridge.py"
+alias win11_monitor="${ARDUINO26_ROOT}/tools/win11_monitor.sh"
+alias pwsh_bypass="${ARDUINO26_ROOT}/tools/pwsh_wrapper.sh"
 
 export ARDUINO26_READY=1
 echo "[+] Arduino26 environment loaded successfully (Root: ${ARDUINO26_ROOT})."
