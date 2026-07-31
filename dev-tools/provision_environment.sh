@@ -74,6 +74,8 @@ if command -v arduino-cli >/dev/null 2>&1; then
     arduino-cli core update-index || true
     echo "[*] Installing Arduino AVR Core (arduino:avr)..."
     arduino-cli core install arduino:avr || true
+    echo "[*] Installing standard sensor libraries (DHT sensor library, Adafruit Unified Sensor)..."
+    arduino-cli lib install "DHT sensor library" "Adafruit Unified Sensor" || true
 else
     echo "[i] Note: 'arduino-cli' binary not found. Skipping core update."
 fi
