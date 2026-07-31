@@ -147,6 +147,30 @@ ravedude uno -P /dev/ttyUSB0 target/avr-atmega328p/release/uno_blink.elf
 
 ---
 
+### Method E: Native Windows Flashing via `cmd.exe` or `pwsh.exe` (Targeting `COM5`)
+
+When flashing directly from Windows 11 host without passing USB into WSL2:
+
+#### 1. Native Windows `arduino-cli.exe`
+```bash
+# Executed from WSL bash via cmd.exe callout (targeting Windows COM5)
+cmd.exe /c arduino-cli compile --fqbn arduino:avr:uno sketches\ky_015_000
+cmd.exe /c arduino-cli upload -p COM5 --fqbn arduino:avr:uno sketches\ky_015_000
+```
+
+#### 2. Native Windows `avrdude.exe`
+```bash
+# Call Windows host avrdude directly targeting COM5
+cmd.exe /c avrdude -C avrdude.conf -v -p atmega328p -c arduino -P COM5 -b 115200 -D -U flash:w:build\sketch.hex:i
+```
+
+#### 3. Windows PowerShell Callout
+```powershell
+pwsh.exe -Command "arduino-cli upload -p COM5 --fqbn arduino:avr:uno sketches\ky_015_000"
+```
+
+---
+
 ## 🛠️ 3. Troubleshooting & Diagnostics
 
 ### Issue 1: `Permission denied: '/dev/ttyUSB0'`

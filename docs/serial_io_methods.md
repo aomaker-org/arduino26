@@ -135,9 +135,61 @@ echo "STATUS" > /dev/ttyUSB0
 
 ---
 
-## 🛠️ 5. Repository Built-In Utilities
+## 🪟 5. Windows 11 Native Methods (`pwsh.exe` and `cmd.exe`)
 
-- **Interactive Python Monitor:** `python3 tools/serial_monitor.py -p /dev/ttyUSB0 -b 115200 -o agy/log/telemetry.log`
+When accessing serial devices directly on the Windows 11 host (e.g. `COM5`) without attaching them to WSL2:
+
+### Method A: Native PowerShell (`pwsh.exe`)
+Run the workspace helper from WSL or Windows terminal:
+
+```bash
+# Call PowerShell serial monitor helper directly from WSL bash
+pwsh.exe -File tools/win11_serial_monitor.ps1 -Port COM5 -Baud 115200
+```
+
+*Raw Inline PowerShell Script:*
+```powershell
+$sp = New-Object System.IO.Ports.SerialPort "COM5", 115200, None, 8, One
+$sp.Open()
+while ($sp.IsOpen) {
+    if ($sp.BytesToRead -gt 0) {
+        $line = $sp.ReadLine()
+        Write-Host "[COM5] $line"
+    }
+    Start-Sleep -Milliseconds 10
+}
+$sp.Close()
+```
+
+### Method B: Windows Command Prompt (`cmd.exe`)
+```cmd
+:: Configure baud rate and port parameters on COM5
+mode COM5: BAUD=115200 PARITY=N DATA=8 STOP=1
+
+:: Read serial stream directly
+type COM5
+
+:: Send command to Arduino
+echo STATUS > COM5
+```
+
+### Method C: Windows Native Python Miniterm Callout
+If Python is installed on the Windows host:
+
+```bash
+# List host ports via Windows Python
+cmd.exe /c python -m serial.tools.list_ports
+
+# Launch pySerial miniterm on COM5
+cmd.exe /c python -m serial.tools.miniterm COM5 115200
+```
+
+---
+
+## 🛠️ 6. Repository Built-In Utilities
+
+- **Linux / WSL Python Monitor:** `python3 tools/serial_monitor.py -p /dev/ttyUSB0 -b 115200 -o agy/log/telemetry.log`
+- **Win11 Native PowerShell Monitor:** `pwsh.exe -File tools/win11_serial_monitor.ps1 -Port COM5 -Baud 115200`
 - **Hardware Bridge & Windows 11 PnP Scanner:** `python3 tools/arduino_serial_bridge.py`
 
 <!-- file docs/serial_io_methods.md ends -->
