@@ -96,6 +96,9 @@ workflows, and repository hygiene for all assistants operating within the
 - **STRICT NO OVERWRITE / NO FILE COLLISION DIRECTIVE:** Everything that opens or creates
   a log, telemetry, or output file MUST NOT step on existing contents. Always append (`a` mode)
   or create a new collision-free timestamped file (`filename_YYMMDD_HHMMSS_nnn.ext`).
+- **STRICT BRANCH & PULL REQUEST DIRECTIVE:** Direct pushes to `origin/main` are disallowed.
+  All feature additions, fixes, and updates MUST be committed on a dedicated git feature branch
+  (e.g., `feat/...` or `fix/...`), pushed to `origin`, and submitted via GitHub Pull Request (`gh pr create`).
 - **Empirical Verification Required:** NEVER declare success without running
   empirical build/test verification commands (e.g. `arduino-cli compile`,
   `python3 tools/...`, `make`).
