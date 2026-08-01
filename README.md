@@ -14,10 +14,10 @@ WSL2 Ubuntu 26 bash with Windows 11 host interop.
 ## ⚡ Concise Getting Started (For Experienced Embedded Engineers)
 
 ### Environment Bootstrap
-Source the environment script to activate Python `.venv`, add path aliases, and
-configure interactive prompt tagging:
+Run the automated workspace provisioning script to install dependencies, then source `config_env` to activate Python `.venv`, add path aliases, and configure interactive prompt tagging:
 
 ```bash
+./dev-tools/provision_environment.sh
 source config_env
 ```
 

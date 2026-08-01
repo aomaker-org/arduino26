@@ -33,12 +33,30 @@
 # Clone & enter workspace
 cd ~/src/arduino26
 
+# Provision workspace dependencies (arduino-cli, gcc-avr, Rust nightly, uv, libraries)
+./dev-tools/provision_environment.sh
+
 # Source the idempotent configuration script
 source config_env
 
 # Optional: tag your active terminal prompt session
 source config_env "uno_testing"
 ```
+
+### 2.1 Workspace Provisioning Script (`./dev-tools/provision_environment.sh`)
+
+The workspace includes a single-line automated provisioning script that bootstraps all required compilers, runtimes, and dependencies:
+
+```bash
+./dev-tools/provision_environment.sh
+```
+
+#### What It Provisions Automatically:
+1. **AVR C/C++ Compiler Toolchain:** `gcc-avr`, `avr-libc`, `avrdude`, `picocom`, `build-essential`.
+2. **Rust Embedded AVR Setup:** `rustup`, Rust `nightly` compiler toolchain, `rust-src` component, and built-in `avr-none` target config.
+3. **Python & CLI Tools:** `uv` package manager, `.venv` virtual environment, `pyserial`, `mpremote`, and editable `ard26` CLI (`uv pip install -e .`).
+4. **Arduino CLI & Libraries:** `arduino-cli`, `arduino:avr` core, `DHT sensor library`, and `Adafruit Unified Sensor`.
+5. **Hardware & Security:** Adds `$USER` to `dialout` group for serial port access, and audits Windows 11 host `pwsh.exe` and `usbipd` status.
 
 ---
 
