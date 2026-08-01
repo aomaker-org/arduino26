@@ -42,5 +42,7 @@ Thumbs.db
 # Arduino / Rust / Cargo transient files
 target/
 /rust/*/target/
+*.egg-info/
+*.egg
 *.user
 *.suo

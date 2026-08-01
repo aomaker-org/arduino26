@@ -7,7 +7,7 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
-arduino-hal = "0.1.0"
+arduino-hal = { git = "https://github.com/Rahix/avr-hal", branch = "main", features = ["arduino-uno"] }
 panic-halt = "0.2.0"
 
 [profile.dev]

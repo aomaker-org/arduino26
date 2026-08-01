@@ -22,8 +22,8 @@ tools_dir = "tools"
 dev_tools_dir = "dev-tools"
 
 [state]
-last_compiled_sketch = "uno_clone_diag"
+last_compiled_sketch = "ky015_idiomatic"
 active_method = "wsl"
-preferred_port = ""
+preferred_port = "/dev/ttyUSB0"
 
 # file arduino_config.toml ends
