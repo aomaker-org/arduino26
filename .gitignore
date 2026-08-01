@@ -21,6 +21,7 @@ __pycache__/
 # AGY Transient Buffers & Logs
 /agy/inbox/*
 !/agy/inbox/.gitkeep
+!/agy/inbox/*.md
 !/agy/inbox/archive/
 /agy/outbox/*
 !/agy/outbox/.gitkeep
