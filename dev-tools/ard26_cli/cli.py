@@ -140,7 +140,9 @@ def cmd_upload(args, cfg: Config):
         sketch_arg = args.sketch
 
     sketch_path = resolve_sketch_path(sketch_arg, cfg.root_dir)
-    port = DeviceDetector.resolve_port(args.port or cfg.preferred_port, cfg.port_wsl)
+    fqbn = getattr(args, 'fqbn', None) or cfg.fqbn
+    port = DeviceDetector.resolve_port(getattr(args, 'port', None) or cfg.preferred_port, cfg.port_wsl)
+    cli_bin = find_arduino_cli()
     ensure_avr_gcc_path()
 
     # Check if target is a Rust Cargo project
