@@ -1,0 +1,14 @@
+/home/fekerr/src/arduino26/rust/ky015_idiomatic/target/release/build/serde/23f7ee64124348cb/out/serde-23f7ee64124348cb.d: /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/fekerr/src/arduino26/rust/ky015_idiomatic/target/release/build/serde/c30afa4d55cda115/out/private.rs
+
+/home/fekerr/src/arduino26/rust/ky015_idiomatic/target/release/build/serde/23f7ee64124348cb/out/libserde-23f7ee64124348cb.rlib: /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/fekerr/src/arduino26/rust/ky015_idiomatic/target/release/build/serde/c30afa4d55cda115/out/private.rs
+
+/home/fekerr/src/arduino26/rust/ky015_idiomatic/target/release/build/serde/23f7ee64124348cb/out/libserde-23f7ee64124348cb.rmeta: /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/fekerr/src/arduino26/rust/ky015_idiomatic/target/release/build/serde/c30afa4d55cda115/out/private.rs
+
+/home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs:
+/home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs:
+/home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs:
+/home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs:
+/home/fekerr/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs:
+/home/fekerr/src/arduino26/rust/ky015_idiomatic/target/release/build/serde/c30afa4d55cda115/out/private.rs:
+
+# env-dep:OUT_DIR=/home/fekerr/src/arduino26/rust/ky015_idiomatic/target/release/build/serde/c30afa4d55cda115/out

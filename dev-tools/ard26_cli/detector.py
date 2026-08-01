@@ -53,18 +53,18 @@ class DeviceDetector:
 
     @staticmethod
     def detect_sketch_baud(sketch_dir: Path) -> Optional[int]:
-        """Scans sketch .ino files for Serial.begin(baud) to auto-detect baud rate."""
+        """Scans sketch .ino and Rust .rs files for Serial.begin(baud) or default_serial!(..., baud)."""
         import re
         if not sketch_dir:
             return None
         
-        # Resolve path if string or path object
         p = Path(sketch_dir)
         if p.is_file():
             p = p.parent
         elif not p.is_dir():
             return None
 
+        # Check Arduino .ino files
         for ino_file in p.glob("*.ino"):
             try:
                 content = ino_file.read_text(encoding="utf-8", errors="ignore")
@@ -73,6 +73,17 @@ class DeviceDetector:
                     return int(match.group(1))
             except Exception:
                 pass
+
+        # Check Rust .rs files under src/
+        for rs_file in p.glob("src/**/*.rs"):
+            try:
+                content = rs_file.read_text(encoding="utf-8", errors="ignore")
+                match = re.search(r'default_serial!\s*\([^,]+,[^,]+,\s*(\d+)\s*\)', content)
+                if match:
+                    return int(match.group(1))
+            except Exception:
+                pass
+
         return None
 
     @classmethod

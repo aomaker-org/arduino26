@@ -1,0 +1,28 @@
+# file: rust/ky015_naive/Cargo.toml
+# Purpose: Naive / Imperative Bit-Banged KY-015 / DHT11 Driver for Arduino Uno (ATmega328P)
+# Target OS / Architecture: AVR ATmega328P (16 MHz)
+
+[package]
+name = "ky015_naive"
+version = "0.1.0"
+authors = ["fekerr"]
+edition = "2021"
+license = "MIT"
+description = "Naive imperative bit-banged KY-015/DHT11 driver for ATmega328P"
+
+[dependencies]
+arduino-hal = { git = "https://github.com/Rahix/avr-hal", branch = "main", features = ["arduino-uno"] }
+panic-halt = "0.2.0"
+ufmt = "0.2.0"
+
+[profile.dev]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+[profile.release]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+# file rust/ky015_naive/Cargo.toml ends

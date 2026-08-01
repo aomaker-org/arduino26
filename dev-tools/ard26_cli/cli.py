@@ -37,27 +37,62 @@ def find_arduino_cli() -> Optional[str]:
 
 
 def resolve_sketch_path(sketch_arg: str, root_dir: Path) -> Path:
-    """Resolves sketch directory path from relative argument or name."""
+    """Resolves sketch or Rust project directory path from relative argument or name."""
     p = Path(sketch_arg)
-    if p.is_dir() and (p / f"{p.name}.ino").exists():
+    if p.is_dir() and ((p / f"{p.name}.ino").exists() or (p / "Cargo.toml").exists()):
         return p.resolve()
     
+    # Check under rust/ directory
+    rust_dir = root_dir / "rust" / sketch_arg
+    if rust_dir.is_dir() and (rust_dir / "Cargo.toml").exists():
+        return rust_dir.resolve()
+
     # Check under sketches/ directory
     sketches_dir = root_dir / "sketches" / sketch_arg
     if sketches_dir.is_dir():
         return sketches_dir.resolve()
     
     # Check if a specific file path was given
-    if p.is_file() and p.suffix == ".ino":
+    if p.is_file():
         return p.parent.resolve()
         
     return p.resolve()
 
 
+def ensure_avr_gcc_path():
+    """Injects arduino-cli bundled avr-gcc directory into os.environ['PATH'] if missing."""
+    if shutil.which("avr-gcc"):
+        return
+    home = Path.home()
+    bundled_paths = list(home.glob(".arduino15/packages/arduino/tools/avr-gcc/*/bin"))
+    if bundled_paths:
+        os.environ["PATH"] = f"{bundled_paths[0]}:{os.environ.get('PATH', '')}"
+
+
 def cmd_compile(args, cfg: Config):
-    """Executes sketch compilation via arduino-cli."""
+    """Executes sketch or Rust compilation via arduino-cli or cargo."""
     logger = OperationLogger(cfg.root_dir)
     sketch_path = resolve_sketch_path(args.sketch or cfg.last_compiled_sketch, cfg.root_dir)
+    ensure_avr_gcc_path()
+    
+    # Check if target is a Rust Cargo project
+    if (sketch_path / "Cargo.toml").exists():
+        print(f"[*] Compiling Rust AVR Project: {sketch_path}")
+        cargo_cmd = ["cargo", "build", "--release"]
+        if shutil.which("rustup"):
+            cargo_cmd = ["cargo", "+nightly", "build", "-Z", "build-std=core", "--release"]
+        res = subprocess.run(cargo_cmd, cwd=sketch_path)
+        if res.returncode == 0:
+            print("[SUCCESS] Rust compilation completed successfully.")
+            cfg.set_last_compiled_sketch(sketch_path.name)
+            logger.log_operation("compile", sketch_path.name, "N/A", "SUCCESS", 0)
+            print(f"[*] Default upload sketch locked -> [{sketch_path.name}]")
+            return
+        else:
+            print(f"[X] Cargo build failed with exit code {res.returncode}.", file=sys.stderr)
+            logger.log_operation("compile", sketch_path.name, "N/A", "FAILED", res.returncode)
+            sys.exit(res.returncode)
+
     fqbn = args.fqbn or cfg.fqbn
     cli_bin = find_arduino_cli()
 
@@ -85,7 +120,7 @@ def cmd_compile(args, cfg: Config):
 
 
 def cmd_upload(args, cfg: Config):
-    """Executes sketch compilation and flashing to serial port."""
+    """Executes sketch or Rust binary compilation and flashing to serial port."""
     logger = OperationLogger(cfg.root_dir)
     if not args.sketch:
         target_name = cfg.last_compiled_sketch
@@ -105,19 +140,51 @@ def cmd_upload(args, cfg: Config):
         sketch_arg = args.sketch
 
     sketch_path = resolve_sketch_path(sketch_arg, cfg.root_dir)
-    fqbn = args.fqbn or cfg.fqbn
     port = DeviceDetector.resolve_port(args.port or cfg.preferred_port, cfg.port_wsl)
-    cli_bin = find_arduino_cli()
+    ensure_avr_gcc_path()
 
-    print(f"[*] Uploading sketch : {sketch_path}")
-    print(f"[*] Target FQBN      : {fqbn}")
-    print(f"[*] Target Port      : {port}")
+    # Check if target is a Rust Cargo project
+    if (sketch_path / "Cargo.toml").exists():
+        print(f"[*] Uploading Rust AVR Target : {sketch_path.name}")
+        print(f"[*] Target Port               : {port}")
+        # Build first
+        cargo_cmd = ["cargo", "build", "--release"]
+        if shutil.which("rustup"):
+            cargo_cmd = ["cargo", "+nightly", "build", "-Z", "build-std=core", "--release"]
+        res_b = subprocess.run(cargo_cmd, cwd=sketch_path)
+        if res_b.returncode != 0:
+            print("[X] Rust compilation failed before upload.", file=sys.stderr)
+            sys.exit(res_b.returncode)
+        
+        # Locate ELF / HEX binary
+        elf_path = sketch_path / "target" / "avr-atmega328p" / "release" / f"{sketch_path.name}.elf"
+        hex_path = sketch_path / "target" / "avr-atmega328p" / "release" / f"{sketch_path.name}.hex"
+        if not elf_path.exists():
+            # Check generic target
+            elf_candidates = list((sketch_path / "target").glob("**/*.elf"))
+            if elf_candidates:
+                elf_path = elf_candidates[0]
+                hex_path = elf_path.with_suffix(".hex")
 
-    if not cli_bin:
-        print("[!] 'arduino-cli' not found in PATH or ~/.local/bin.", file=sys.stderr)
-        print("[!] To install required utilities, run: ./dev-tools/provision_environment.sh", file=sys.stderr)
-        logger.log_operation("upload", sketch_path.name, port, "FAILED", 1)
-        sys.exit(1)
+        if elf_path.exists():
+            subprocess.run(["avr-objcopy", "-O", "ihex", "-R", ".eeprom", str(elf_path), str(hex_path)])
+            flash_target = str(hex_path) if hex_path.exists() else str(elf_path)
+        else:
+            flash_target = str(sketch_path)
+
+        # Flash via avrdude
+        avrdude_cmd = ["avrdude", "-p", "m328p", "-c", "arduino", "-P", port, "-b", "115200", "-U", f"flash:w:{flash_target}:i"]
+        print(f"[*] Flashing via avrdude: {' '.join(avrdude_cmd)}")
+        res_u = subprocess.run(avrdude_cmd)
+        if res_u.returncode == 0:
+            print("[SUCCESS] Rust AVR binary successfully flashed.")
+            cfg.save_successful_upload(port, "wsl")
+            logger.log_operation("upload", sketch_path.name, port, "SUCCESS", 0)
+            return
+        else:
+            print(f"[!] avrdude flash failed on {port}.", file=sys.stderr)
+            logger.log_operation("upload", sketch_path.name, port, "FAILED", res_u.returncode)
+            sys.exit(res_u.returncode)
 
     # Convert sketch path to Windows UNC path if needed
     win_sketch_path = str(sketch_path)

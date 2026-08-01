@@ -1,0 +1,11 @@
+/home/fekerr/src/arduino26/rust/ky015_naive/target/release/build/arduino-hal/02b737e788036d67/out/arduino_hal-02b737e788036d67.d: /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/lib.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/clock.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/delay.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/port/mod.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/port/uno.rs
+
+/home/fekerr/src/arduino26/rust/ky015_naive/target/release/build/arduino-hal/02b737e788036d67/out/libarduino_hal-02b737e788036d67.rlib: /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/lib.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/clock.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/delay.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/port/mod.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/port/uno.rs
+
+/home/fekerr/src/arduino26/rust/ky015_naive/target/release/build/arduino-hal/02b737e788036d67/out/libarduino_hal-02b737e788036d67.rmeta: /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/lib.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/clock.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/delay.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/port/mod.rs /home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/port/uno.rs
+
+/home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/lib.rs:
+/home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/clock.rs:
+/home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/delay.rs:
+/home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/port/mod.rs:
+/home/fekerr/.cargo/git/checkouts/avr-hal-88cb7c7248a695f0/e5c8f37/arduino-hal/src/port/uno.rs:

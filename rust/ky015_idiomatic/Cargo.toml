@@ -1,0 +1,30 @@
+# file: rust/ky015_idiomatic/Cargo.toml
+# Purpose: Idiomatic / Modular Type-Safe KY-015 / DHT11 Driver for Arduino Uno (ATmega328P)
+# Provenance: Idiomatic Rust embedded-hal driver architecture with Result<Reading, Error> enums
+# Target OS / Architecture: AVR ATmega328P (16 MHz)
+
+[package]
+name = "ky015_idiomatic"
+version = "0.1.0"
+authors = ["fekerr"]
+edition = "2021"
+license = "MIT"
+description = "Idiomatic type-safe KY-015/DHT11 driver for ATmega328P"
+
+[dependencies]
+arduino-hal = { git = "https://github.com/Rahix/avr-hal", branch = "main", features = ["arduino-uno"] }
+panic-halt = "0.2.0"
+ufmt = "0.2.0"
+dht-sensor = "0.2.1"
+
+[profile.dev]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+[profile.release]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+# file rust/ky015_idiomatic/Cargo.toml ends

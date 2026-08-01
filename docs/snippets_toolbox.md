@@ -72,4 +72,22 @@ For native Windows 11 command line environments:
 4. **Install CH340 Serial Driver:**
    Download and install `CH341SER.EXE` from [WCH Official Driver Download](http://www.wch-ic.com/downloads/CH341SER_EXE.html).
 
+---
+
+## 4. Rust AVR Microcontroller Implementations (`rust/*`)
+
+### 1. `rust/ky015_naive/` — Naive / Imperative Bit-Banged Driver
+- **Path:** [rust/ky015_naive/src/main.rs](file:///home/fekerr/src/arduino26/rust/ky015_naive/src/main.rs)
+- **Purpose:** Naive, imperative bit-banging of the KY-015 / DHT11 single-wire protocol on ATmega328P.
+- **Provenance / Attribution:** Direct Rust port of classical Arduino C++ single-wire bit-banging logic.
+- **Target MCU:** Arduino Uno (ATmega328P, 16 MHz, Pin D2).
+- **Execution Command:** `ard26 run rust/ky015_naive`
+
+### 2. `rust/ky015_idiomatic/` — Type-Safe Idiomatic Crate Architecture
+- **Path:** [rust/ky015_idiomatic/src/main.rs](file:///home/fekerr/src/arduino26/rust/ky015_idiomatic/src/main.rs)
+- **Purpose:** Modular, type-safe Rust implementation using `embedded-hal` drivers and `dht-sensor` crate with `Result<Reading, DhtError>` error handling.
+- **Provenance / Attribution:** Leverages `dht-sensor` crate architecture and `Rahix/avr-hal` HAL abstractions.
+- **Target MCU:** Arduino Uno (ATmega328P, 16 MHz, Pin D2).
+- **Execution Command:** `ard26 run rust/ky015_idiomatic`
+
 <!-- file docs/snippets_toolbox.md ends -->

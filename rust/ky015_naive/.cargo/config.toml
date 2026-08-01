@@ -1,0 +1,7 @@
+# file: rust/ky015_naive/.cargo/config.toml
+[build]
+target = "avr-none"
+rustflags = ["-C", "target-cpu=atmega328p"]
+
+[unstable]
+build-std = ["core"]

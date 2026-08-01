@@ -90,6 +90,11 @@ fi
 export ARDUINO_DEFAULT_PORT="${ARDUINO_PORT_WSL:-/dev/ttyUSB0}"
 export ARDUINO_DEFAULT_FQBN="${ARDUINO_FQBN:-arduino:avr:uno}"
 
+# Add arduino-cli bundled avr-gcc toolchain to PATH
+if [ -d "$HOME/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin" ]; then
+    export PATH="$HOME/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin:$PATH"
+fi
+
 # 7. Interactive Prompt Customization
 if [[ $- == *i* ]]; then
     export PS1='\[\e]0;\u@\h: \w\a\]\n\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;36m\][arduino26${ARDUINO26_RUN_TYPE:+:$ARDUINO26_RUN_TYPE}]\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\] \[\033[01;33m\]\D{%y%m_%H%M}_\!\[\033[00m\]\n; '
