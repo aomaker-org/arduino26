@@ -40,6 +40,7 @@ scratch/*
 Thumbs.db
 
 # Arduino / Rust / Cargo transient files
-/rust/uno_blink/target/
+target/
+/rust/*/target/
 *.user
 *.suo

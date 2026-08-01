@@ -1,1 +1,0 @@
-{"rustc":12019306335353385202,"features":"","declared_features":"","target":0,"profile":0,"path":0,"deps":[[14155807335134880362,"build_script_build",false,13771863355260179075]],"local":[{"RerunIfChanged":{"output":"release/build/embedded-hal-bus-88d6a1e556b5c745/output","paths":["build.rs"]}}],"rustflags":[],"config":0,"compile_kind":0}

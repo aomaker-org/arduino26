@@ -1,1 +1,0 @@
-avr_hal_generic::port::Pin<Output, Dynamic>: InputOutputPin<()>
