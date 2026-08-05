@@ -303,6 +303,8 @@ def cmd_monitor(args, cfg: Config):
     print(f"[*] Target Port : {port}")
     print(f"[*] Baud Rate   : {baud} {'(auto-detected from sketch)' if detected_baud and not getattr(args, 'baud', None) else ''}")
     print(f"[*] Session Log : {t_logger.session_log.name}")
+    print(f"[*] Monitor log in another terminal (triple-click to copy):")
+    print(f"tail -f {t_logger.session_log.resolve()}")
     print(f"[*] Exit        : Press Ctrl+C to disconnect")
     print(f"----------------------------------------------------------")
     logger.log_operation("monitor", "N/A", port, "STARTED", 0)
@@ -382,6 +384,68 @@ def cmd_config(args, cfg: Config):
     logger.log_operation("config", "N/A", "N/A", "SUCCESS", 0)
 
 
+def cmd_attach(args, cfg: Config):
+    """Scan and attach host serial devices to WSL2 using usbipd-win."""
+    print("==========================================================")
+    print("    Arduino26 USBIPD Host Serial Auto-Attach             ")
+    print("==========================================================")
+    
+    devices = DeviceDetector.list_usbipd_devices()
+    if not devices:
+        print("[!] No USB devices detected on host or 'usbipd-win' is not installed.")
+        print("[i] For installation instructions, see: docs/usbipd_installation.md")
+        return
+    
+    print("[*] Active Host USB Devices:")
+    serial_candidates = []
+    for dev in devices:
+        is_serial = any(k in dev["description"].lower() for k in ["ch340", "usb-serial", "cp210", "ft232", "prolific", "arduino", "serial"])
+        marker = " [SERIAL ADAPTER]" if is_serial else ""
+        print(f"    - BusID: {dev['busid']} | State: {dev['state']:<12} | {dev['description']}{marker}")
+        if is_serial:
+            serial_candidates.append(dev)
+            
+    if not serial_candidates:
+        print("\n[!] No host USB serial adapters recognized.")
+        return
+        
+    print(f"\n[*] Found {len(serial_candidates)} candidate serial device(s).")
+    target = serial_candidates[0]
+    
+    if target["state"].lower() == "attached":
+        print(f"[SUCCESS] Device at Bus ID {target['busid']} is already attached.")
+        port = DeviceDetector.find_wsl_port()
+        if port:
+            print(f"[SUCCESS] WSL serial port active at: {port}")
+            try:
+                if os.path.exists(port):
+                    os.chmod(port, 0o666)
+            except Exception:
+                pass
+        return
+
+    print(f"[*] Attaching device at Bus ID {target['busid']}...")
+    
+    if DeviceDetector.attach_usbipd_device(target["busid"]):
+        print("[SUCCESS] Device successfully attached via usbipd.")
+        print("[*] Waiting for WSL serial node to initialize...")
+        import time
+        for _ in range(15):
+            time.sleep(0.2)
+            port = DeviceDetector.find_wsl_port()
+            if port:
+                print(f"[SUCCESS] WSL serial port active at: {port}")
+                try:
+                    if os.path.exists(port):
+                        os.chmod(port, 0o666)
+                except Exception:
+                    pass
+                return
+        print("[!] Device attached, but no serial node was created in WSL. You may need to run 'sudo chmod 666 /dev/ttyUSB0' manually.")
+    else:
+        print("[X] Failed to attach device.")
+
+
 def cmd_run(args, cfg: Config):
     """Executes sequential pipeline: Compile -> Upload -> Monitor."""
     print("==========================================================")
@@ -404,7 +468,7 @@ def main():
     # "ard26 compile upload monitor sketches/uno_clone_diag"
     argv = sys.argv[1:]
     if len(argv) >= 2:
-        valid_cmds = {"compile", "upload", "monitor", "run"}
+        valid_cmds = {"compile", "upload", "monitor", "run", "attach"}
         cmds_found = []
         sketch_found = None
 
@@ -472,6 +536,9 @@ def main():
     # config
     subparsers.add_parser("config", help="Show active configuration settings")
 
+    # attach
+    subparsers.add_parser("attach", help="Attach host USB serial devices to WSL2 via usbipd-win")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -485,6 +552,7 @@ def main():
         "run": cmd_run,
         "scan": cmd_scan,
         "config": cmd_config,
+        "attach": cmd_attach,
     }
 
     handler = commands.get(args.command)
