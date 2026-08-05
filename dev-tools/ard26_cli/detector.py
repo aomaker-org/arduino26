@@ -2,13 +2,12 @@
 # Purpose: Serial port auto-detection & PnP audit module for ard26 CLI
 # Target OS: Ubuntu 24.04 / 26.04 LTS (WSL2) + Windows 11 Host
 
-import os
-import sys
 import glob
+import os
 import subprocess
+import sys
 import time
 from pathlib import Path
-from typing import Optional, List, Dict
 
 try:
     import serial.tools.list_ports
@@ -20,7 +19,7 @@ class DeviceDetector:
     """Detects active serial ports on WSL Linux runtime and Windows 11 host."""
 
     @staticmethod
-    def find_wsl_port() -> Optional[str]:
+    def find_wsl_port() -> str | None:
         """Scans for active serial devices under /dev/ttyUSB* or /dev/ttyACM*."""
         candidates = sorted(glob.glob("/dev/ttyUSB*") + glob.glob("/dev/ttyACM*"))
         if candidates:
@@ -35,7 +34,7 @@ class DeviceDetector:
         return None
 
     @staticmethod
-    def audit_win11_host() -> List[Dict[str, str]]:
+    def audit_win11_host() -> list[dict[str, str]]:
         """Queries Windows 11 host PnP devices via powershell.exe."""
         devices = []
         try:
@@ -43,23 +42,23 @@ class DeviceDetector:
                 "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
                 "Get-PnpDevice -PresentOnly | Where-Object { $_.Class -eq 'Ports' } | Select-Object FriendlyName, Status"
             ]
-            res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=5, stdin=subprocess.DEVNULL)
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=5, stdin=subprocess.DEVNULL, check=False)
             if res.returncode == 0:
                 for line in res.stdout.splitlines():
                     line = line.strip()
                     if line and ("COM" in line or "CH340" in line or "Arduino" in line):
                         devices.append({"friendly_name": line})
-        except Exception:
+        except Exception:  # noqa: BLE001, S110
             pass
         return devices
 
     @staticmethod
-    def list_usbipd_devices() -> List[Dict[str, str]]:
+    def list_usbipd_devices() -> list[dict[str, str]]:
         """Queries usbipd-win devices from host using powershell.exe."""
         devices = []
         try:
             cmd = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "usbipd list"]
-            res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=5, stdin=subprocess.DEVNULL)
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=5, stdin=subprocess.DEVNULL, check=False)
             if res.returncode == 0:
                 in_connected = False
                 for line in res.stdout.splitlines():
@@ -102,7 +101,7 @@ class DeviceDetector:
                                     "description": desc,
                                     "state": state
                                 })
-        except Exception:
+        except Exception:  # noqa: BLE001, S110
             pass
         return devices
 
@@ -111,28 +110,28 @@ class DeviceDetector:
         """Attaches a device on the host to WSL2 using usbipd-win."""
         try:
             cmd = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", f"usbipd attach --wsl --busid {busid}"]
-            res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, stdin=subprocess.DEVNULL)
+            res = subprocess.run(cmd, capture_output=True, text=True, stdin=subprocess.DEVNULL, check=False)
             if res.returncode == 0:
                 return True
             else:
                 if "bind" in res.stderr.lower() or "share" in res.stderr.lower() or "not shared" in res.stderr.lower():
                     print(f"[*] Device {busid} may not be shared. Attempting to bind/share it first (may prompt for Administrator permission on host)...")
                     bind_cmd = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", f"Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command usbipd bind --busid {busid}' -Verb RunAs"]
-                    subprocess.run(bind_cmd, stdin=subprocess.DEVNULL)
+                    subprocess.run(bind_cmd, stdin=subprocess.DEVNULL, check=False)
                     time.sleep(3)
-                    res2 = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, stdin=subprocess.DEVNULL)
+                    res2 = subprocess.run(cmd, capture_output=True, text=True, stdin=subprocess.DEVNULL, check=False)
                     if res2.returncode == 0:
                         return True
                     else:
                         print(f"[X] Failed to attach: {res2.stderr.strip()}", file=sys.stderr)
                 else:
                     print(f"[X] Failed to attach: {res.stderr.strip()}", file=sys.stderr)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"[X] Error running usbipd: {e}", file=sys.stderr)
         return False
 
     @classmethod
-    def auto_attach_serial(cls) -> Optional[str]:
+    def auto_attach_serial(cls) -> str | None:
         """Scans host devices via usbipd, identifies serial adapters, and attaches them."""
         devices = cls.list_usbipd_devices()
         serial_candidates = []
@@ -145,9 +144,9 @@ class DeviceDetector:
             return None
         
         target = serial_candidates[0]
-        print(f"[*] Auto-detecting host USB serial device via usbipd...")
+        print("[*] Auto-detecting host USB serial device via usbipd...")
         print(f"[*] Found candidate host device at Bus ID {target['busid']}: {target['description']}")
-        print(f"[*] Attempting auto-attachment to WSL2...")
+        print("[*] Attempting auto-attachment to WSL2...")
         
         if cls.attach_usbipd_device(target["busid"]):
             print("[SUCCESS] Device successfully attached via usbipd.")
@@ -158,13 +157,13 @@ class DeviceDetector:
                     try:
                         if os.path.exists(port):
                             os.chmod(port, 0o666)
-                    except Exception:
+                    except Exception:  # noqa: BLE001, S110
                         pass
                     return port
         return None
 
     @staticmethod
-    def detect_sketch_baud(sketch_dir: Path) -> Optional[int]:
+    def detect_sketch_baud(sketch_dir: Path) -> int | None:
         """Scans sketch .ino and Rust .rs files for Serial.begin(baud) or default_serial!(..., baud)."""
         import re
         if not sketch_dir:
@@ -183,7 +182,7 @@ class DeviceDetector:
                 match = re.search(r'Serial\.begin\s*\(\s*(\d+)\s*\)', content)
                 if match:
                     return int(match.group(1))
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
 
         # Check Rust .rs files under src/
@@ -193,13 +192,13 @@ class DeviceDetector:
                 match = re.search(r'default_serial!\s*\([^,]+,[^,]+,\s*(\d+)\s*\)', content)
                 if match:
                     return int(match.group(1))
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
 
         return None
 
     @classmethod
-    def resolve_port(cls, user_port: Optional[str] = None, default_port: str = "/dev/ttyUSB0") -> str:
+    def resolve_port(cls, user_port: str | None = None, default_port: str = "/dev/ttyUSB0") -> str:
         """Resolves target port: explicit user port -> autodetected port -> autodetect host usbipd -> config default."""
         if user_port:
             return user_port

@@ -2,7 +2,6 @@
 # Purpose: Operation history and telemetry logger for ard26 CLI invocations
 # Target OS: Ubuntu 24.04 / 26.04 LTS (WSL2) + Windows 11 Host
 
-import os
 import sys
 import time
 from pathlib import Path
@@ -23,7 +22,7 @@ class OperationLogger:
             try:
                 with open(self.csv_log, "w", encoding="utf-8") as f:
                     f.write("timestamp,command,sketch,port,status,exit_code\n")
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
 
     def log_operation(self, command: str, sketch: str, port: str, status: str, exit_code: int = 0):
@@ -35,7 +34,7 @@ class OperationLogger:
         try:
             with open(self.history_log, "a", encoding="utf-8") as f:
                 f.write(log_line)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"[!] Warning: Could not write history log: {e}", file=sys.stderr)
 
         # Log to CSV telemetry
@@ -43,7 +42,7 @@ class OperationLogger:
         try:
             with open(self.csv_log, "a", encoding="utf-8") as f:
                 f.write(csv_line)
-        except Exception:
+        except Exception:  # noqa: BLE001, S110
             pass
 
 # file dev-tools/ard26_cli/logger.py ends

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # ==============================================================================
 # Filename:     tools/arduino_serial_bridge.py
 # Purpose:      Arduino USB Serial Scanner, Passthrough & WSL2 Bridge Utility
@@ -9,9 +8,9 @@
 # Attribution:  fekerr & Gemini
 # ==============================================================================
 
+import subprocess
 import sys
 import time
-import subprocess
 from pathlib import Path
 
 try:
@@ -46,7 +45,7 @@ def query_win11_pnp_serial() -> list:
     ]
     win_devices = []
     try:
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=False)
         if res.returncode == 0 and res.stdout.strip():
             import json
             try:
@@ -55,9 +54,9 @@ def query_win11_pnp_serial() -> list:
                     win_devices.append(data)
                 elif isinstance(data, list):
                     win_devices.extend(data)
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"[-] Win11 PnP query note: {e}", file=sys.stderr)
     return win_devices
 
@@ -118,7 +117,7 @@ def audit_and_connect_arduino():
                             with open(telemetry_csv, "a", encoding="utf-8") as f:
                                 f.write(f"{ts},{arduino_port},Arduino_USB,CONNECTED,{baud}Baud_OK\n")
                             break
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     print(f"[!] Serial connection attempt note on {arduino_port} ({baud} baud): {e}", flush=True)
         else:
             print("[!] pyserial not installed in active environment. Run: pip install pyserial")

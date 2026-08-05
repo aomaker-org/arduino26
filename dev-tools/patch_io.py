@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # ==============================================================================
 # Filename:     tools/patch_io.py
 # Purpose:      Bridge wrapper for input (clip2files) and output (files2clip)
@@ -9,9 +8,10 @@
 # Attribution:  fekerr & Gemini
 # ==============================================================================
 
-import sys
 import os
 import subprocess
+import sys
+
 
 def patch_in(file_path):
     print(f"[+] Patching Input: {file_path}")
@@ -19,7 +19,7 @@ def patch_in(file_path):
     tool_path = os.path.join(script_dir, "clip2files")
     if os.path.exists(tool_path):
         cmd = [sys.executable, tool_path]
-        subprocess.run(cmd)
+        subprocess.run(cmd, check=False)
     else:
         print(f"[-] Error: clip2files not found at {tool_path}")
 
@@ -29,7 +29,7 @@ def patch_out(file_path):
     tool_path = os.path.join(script_dir, "files2clip")
     if os.path.exists(tool_path):
         cmd = [sys.executable, tool_path, file_path]
-        subprocess.run(cmd)
+        subprocess.run(cmd, check=False)
     else:
         print(f"[-] Error: files2clip not found at {tool_path}")
 

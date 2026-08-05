@@ -2,14 +2,13 @@
 # Purpose: Unified command-line interface entrypoint for ard26 tool
 # Target OS: Ubuntu 24.04 / 26.04 LTS (WSL2) + Windows 11 Host
 
-import os
-import sys
 import argparse
-import subprocess
-import time
-from typing import Optional
-from pathlib import Path
+import os
 import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
 
 from ard26_cli.config import Config
 from ard26_cli.detector import DeviceDetector
@@ -22,7 +21,7 @@ except ImportError:
     serial = None
 
 
-def find_arduino_cli() -> Optional[str]:
+def find_arduino_cli() -> str | None:
     """Finds arduino-cli binary in PATH or ~/.local/bin."""
     path = shutil.which("arduino-cli")
     if path:
@@ -81,7 +80,7 @@ def cmd_compile(args, cfg: Config):
         cargo_cmd = ["cargo", "build", "--release"]
         if shutil.which("rustup"):
             cargo_cmd = ["cargo", "+nightly", "build", "-Z", "build-std=core", "--release"]
-        res = subprocess.run(cargo_cmd, cwd=sketch_path)
+        res = subprocess.run(cargo_cmd, cwd=sketch_path, check=False)
         if res.returncode == 0:
             print("[SUCCESS] Rust compilation completed successfully.")
             cfg.set_last_compiled_sketch(sketch_path.name)
@@ -107,7 +106,7 @@ def cmd_compile(args, cfg: Config):
     print(f"[*] CLI Executable  : {cli_bin}")
     
     cmd = [cli_bin, "compile", "--fqbn", fqbn, str(sketch_path)]
-    res = subprocess.run(cmd)
+    res = subprocess.run(cmd, check=False)
     if res.returncode == 0:
         print("[SUCCESS] Compilation completed successfully.")
         cfg.set_last_compiled_sketch(sketch_path.name)
@@ -153,7 +152,7 @@ def cmd_upload(args, cfg: Config):
         cargo_cmd = ["cargo", "build", "--release"]
         if shutil.which("rustup"):
             cargo_cmd = ["cargo", "+nightly", "build", "-Z", "build-std=core", "--release"]
-        res_b = subprocess.run(cargo_cmd, cwd=sketch_path)
+        res_b = subprocess.run(cargo_cmd, cwd=sketch_path, check=False)
         if res_b.returncode != 0:
             print("[X] Rust compilation failed before upload.", file=sys.stderr)
             sys.exit(res_b.returncode)
@@ -169,7 +168,7 @@ def cmd_upload(args, cfg: Config):
                 hex_path = elf_path.with_suffix(".hex")
 
         if elf_path.exists():
-            subprocess.run(["avr-objcopy", "-O", "ihex", "-R", ".eeprom", str(elf_path), str(hex_path)])
+            subprocess.run(["avr-objcopy", "-O", "ihex", "-R", ".eeprom", str(elf_path), str(hex_path)], check=False)
             flash_target = str(hex_path) if hex_path.exists() else str(elf_path)
         else:
             flash_target = str(sketch_path)
@@ -177,7 +176,7 @@ def cmd_upload(args, cfg: Config):
         # Flash via avrdude
         avrdude_cmd = ["avrdude", "-p", "m328p", "-c", "arduino", "-P", port, "-b", "115200", "-U", f"flash:w:{flash_target}:i"]
         print(f"[*] Flashing via avrdude: {' '.join(avrdude_cmd)}")
-        res_u = subprocess.run(avrdude_cmd)
+        res_u = subprocess.run(avrdude_cmd, check=False)
         if res_u.returncode == 0:
             print("[SUCCESS] Rust AVR binary successfully flashed.")
             cfg.save_successful_upload(port, "wsl")
@@ -191,10 +190,10 @@ def cmd_upload(args, cfg: Config):
     # Convert sketch path to Windows UNC path if needed
     win_sketch_path = str(sketch_path)
     try:
-        wsl_res = subprocess.run(["wslpath", "-w", str(sketch_path)], stdout=subprocess.PIPE, text=True)
+        wsl_res = subprocess.run(["wslpath", "-w", str(sketch_path)], capture_output=True, text=True, check=False)
         if wsl_res.returncode == 0 and wsl_res.stdout.strip():
             win_sketch_path = wsl_res.stdout.strip()
-    except Exception:
+    except Exception:  # noqa: BLE001, S110
         pass
 
     def run_windows_upload(target_win_port: str) -> bool:
@@ -204,7 +203,7 @@ def cmd_upload(args, cfg: Config):
             "pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
             f"arduino-cli upload -p {target_win_port} --fqbn {fqbn} '{win_sketch_path}'"
         ]
-        res = subprocess.run(ps_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        res = subprocess.run(ps_cmd, capture_output=True, text=True, check=False)
         if res.returncode == 0:
             print(f"[SUCCESS] Upload to Windows host port {target_win_port} complete.")
             cfg.save_successful_upload(target_win_port, "win_failover")
@@ -213,17 +212,17 @@ def cmd_upload(args, cfg: Config):
         else:
             if "not recognized" in res.stderr or "CommandNotFoundException" in res.stderr or res.returncode != 0:
                 print(f"[!] Windows host upload failed on {target_win_port}.", file=sys.stderr)
-                print(f"----------------------------------------------------------", file=sys.stderr)
-                print(f"[i] 'arduino-cli' is not installed in your Windows 11 host environment.", file=sys.stderr)
-                print(f"[i] To install arduino-cli on Windows host, open PowerShell as Admin and run:", file=sys.stderr)
-                print(f"        winget install Arduino.cli", file=sys.stderr)
-                print(f"        arduino-cli core update-index && arduino-cli core install arduino:avr", file=sys.stderr)
-                print(f"----------------------------------------------------------", file=sys.stderr)
-                print(f"[i] Alternatively, attach your physical USB device (CH340) into WSL2:", file=sys.stderr)
-                print(f"        1. Open PowerShell on Windows host: pwsh.exe", file=sys.stderr)
-                print(f"        2. List connected USB devices:      usbipd list", file=sys.stderr)
-                print(f"        3. Attach device to WSL2:           usbipd attach --wsl --busid <BUSID>", file=sys.stderr)
-                print(f"----------------------------------------------------------", file=sys.stderr)
+                print("----------------------------------------------------------", file=sys.stderr)
+                print("[i] 'arduino-cli' is not installed in your Windows 11 host environment.", file=sys.stderr)
+                print("[i] To install arduino-cli on Windows host, open PowerShell as Admin and run:", file=sys.stderr)
+                print("        winget install Arduino.cli", file=sys.stderr)
+                print("        arduino-cli core update-index && arduino-cli core install arduino:avr", file=sys.stderr)
+                print("----------------------------------------------------------", file=sys.stderr)
+                print("[i] Alternatively, attach your physical USB device (CH340) into WSL2:", file=sys.stderr)
+                print("        1. Open PowerShell on Windows host: pwsh.exe", file=sys.stderr)
+                print("        2. List connected USB devices:      usbipd list", file=sys.stderr)
+                print("        3. Attach device to WSL2:           usbipd attach --wsl --busid <BUSID>", file=sys.stderr)
+                print("----------------------------------------------------------", file=sys.stderr)
             logger.log_operation("upload", sketch_path.name, target_win_port, "FAILED", res.returncode)
             return False
 
@@ -234,7 +233,7 @@ def cmd_upload(args, cfg: Config):
 
     # Linux / WSL Upload Callout
     cmd = [cli_bin, "compile", "-u", "-p", port, "--fqbn", fqbn, str(sketch_path)]
-    res = subprocess.run(cmd, capture_output=True, text=True)
+    res = subprocess.run(cmd, capture_output=True, text=True, check=False)
     if res.returncode == 0:
         print(res.stdout)
         print("[SUCCESS] Compile and upload complete.")
@@ -248,11 +247,11 @@ def cmd_upload(args, cfg: Config):
             print(res.stderr, file=sys.stderr)
 
         if "Permission denied" in res.stderr or "Permission denied" in res.stdout:
-            print(f"----------------------------------------------------------", file=sys.stderr)
+            print("----------------------------------------------------------", file=sys.stderr)
             print(f"[!] Permission denied accessing WSL serial node {port}.", file=sys.stderr)
-            print(f"[i] Run this command in terminal to fix device permissions:", file=sys.stderr)
+            print("[i] Run this command in terminal to fix device permissions:", file=sys.stderr)
             print(f"        sudo chmod 666 {port}", file=sys.stderr)
-            print(f"----------------------------------------------------------", file=sys.stderr)
+            print("----------------------------------------------------------", file=sys.stderr)
 
         print(f"[!] WSL port {port} upload failed (device not bound to WSL or port busy).", file=sys.stderr)
         win_port = cfg.port_win
@@ -297,16 +296,16 @@ def cmd_monitor(args, cfg: Config):
 
     t_logger = TelemetryLogger(cfg.root_dir, port, baud)
 
-    print(f"==========================================================")
-    print(f"    Arduino26 Unified Serial Monitor                      ")
-    print(f"==========================================================")
+    print("==========================================================")
+    print("    Arduino26 Unified Serial Monitor                      ")
+    print("==========================================================")
     print(f"[*] Target Port : {port}")
     print(f"[*] Baud Rate   : {baud} {'(auto-detected from sketch)' if detected_baud and not getattr(args, 'baud', None) else ''}")
     print(f"[*] Session Log : {t_logger.session_log.name}")
-    print(f"[*] Monitor log in another terminal (triple-click to copy):")
+    print("[*] Monitor log in another terminal (triple-click to copy):")
     print(f"tail -f {t_logger.session_log.resolve()}")
-    print(f"[*] Exit        : Press Ctrl+C to disconnect")
-    print(f"----------------------------------------------------------")
+    print("[*] Exit        : Press Ctrl+C to disconnect")
+    print("----------------------------------------------------------")
     logger.log_operation("monitor", "N/A", port, "STARTED", 0)
 
     if port.startswith("COM"):
@@ -316,7 +315,7 @@ def cmd_monitor(args, cfg: Config):
             "-File", str(cfg.root_dir / "tools" / "win11_serial_monitor.ps1"),
             "-Port", port, "-Baud", str(baud)
         ]
-        subprocess.run(ps_cmd)
+        subprocess.run(ps_cmd, check=False)
         t_logger.close(status="Host Windows Monitor Complete")
         return
 
@@ -338,7 +337,7 @@ def cmd_monitor(args, cfg: Config):
     except KeyboardInterrupt:
         print(f"\n[*] Disconnected from {port}.")
         t_logger.close(status="Clean Exit (Ctrl+C)")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"[X] Serial Error on {port}: {e}", file=sys.stderr)
         t_logger.close(status=f"Serial Error: {e}")
 
@@ -420,7 +419,7 @@ def cmd_attach(args, cfg: Config):
             try:
                 if os.path.exists(port):
                     os.chmod(port, 0o666)
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
         return
 
@@ -438,7 +437,7 @@ def cmd_attach(args, cfg: Config):
                 try:
                     if os.path.exists(port):
                         os.chmod(port, 0o666)
-                except Exception:
+                except Exception:  # noqa: BLE001, S110
                     pass
                 return
         print("[!] Device attached, but no serial node was created in WSL. You may need to run 'sudo chmod 666 /dev/ttyUSB0' manually.")

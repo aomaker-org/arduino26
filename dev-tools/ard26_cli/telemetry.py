@@ -2,7 +2,6 @@
 # Purpose: Collision-free telemetry logger with custom timestamps, headers, and footers
 # Target OS: Ubuntu 24.04 / 26.04 LTS (WSL2) + Windows 11 Host
 
-import os
 import sys
 import time
 from pathlib import Path
@@ -88,14 +87,14 @@ class TelemetryLogger:
             with open(self.session_log, "a", encoding="utf-8") as f:
                 f.write(text)
                 f.flush()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"[!] Warning: Could not write session log: {e}", file=sys.stderr)
 
         try:
             with open(self.master_log, "a", encoding="utf-8") as f:
                 f.write(text)
                 f.flush()
-        except Exception:
+        except Exception:  # noqa: BLE001, S110
             pass
 
 # file dev-tools/ard26_cli/telemetry.py ends

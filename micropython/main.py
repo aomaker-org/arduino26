@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: MIT
 # Purpose: MicroPython / CircuitPython onboard blink loop for microcontrollers
 
-import machine
 import time
+
+import machine
 
 led = machine.Pin(13, machine.Pin.OUT)
 

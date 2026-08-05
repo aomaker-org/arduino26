@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # ==============================================================================
 # Path:        tools/serial_monitor.py
 # Purpose:     Bi-directional Serial Terminal & Telemetry Logger for Arduino/CH340
@@ -8,11 +7,10 @@
 # Updated:     2026-07-31
 # ==============================================================================
 
-import sys
-import time
 import argparse
+import sys
 import threading
-from pathlib import Path
+import time
 
 try:
     import serial
@@ -48,7 +46,7 @@ def read_loop(ser, log_file=None):
                             f.write(f"{output_str}\n")
             else:
                 time.sleep(0.01)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"\n[!] Serial read error: {e}", file=sys.stderr)
             break
 
@@ -65,7 +63,7 @@ def write_loop(ser):
         except (EOFError, KeyboardInterrupt):
             ser.close()
             sys.exit(0)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"\n[!] Serial write error: {e}", file=sys.stderr)
             break
 
@@ -91,8 +89,8 @@ def main():
     print("==========================================================")
     print(f"[*] Port      : {args.port}")
     print(f"[*] Baud Rate : {args.baud}")
-    print(f"[*] Command   : Type commands and press ENTER to send.")
-    print(f"[*] Exit      : Type ':q' or press Ctrl+C to exit.")
+    print("[*] Command   : Type commands and press ENTER to send.")
+    print("[*] Exit      : Type ':q' or press Ctrl+C to exit.")
     if args.output:
         print(f"[*] Logging to: {args.output}")
     print("----------------------------------------------------------", flush=True)
@@ -100,7 +98,7 @@ def main():
     try:
         ser = serial.Serial(args.port, args.baud, timeout=1)
         time.sleep(1.5)  # Allow Arduino DTR reset to settle
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"[X] Connection Error on {args.port}: {e}", file=sys.stderr)
         print("\nTroubleshooting Hints:")
         print("  1. Check permissions: sudo usermod -aG dialout $USER")
