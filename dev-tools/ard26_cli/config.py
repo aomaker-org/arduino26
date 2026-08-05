@@ -5,6 +5,7 @@
 import os
 import sys
 from pathlib import Path
+from typing import ClassVar
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -18,7 +19,7 @@ else:
 class Config:
     """Manages workspace configuration settings loaded from arduino_config.toml."""
     
-    DEFAULT_CONFIG = {
+    DEFAULT_CONFIG: ClassVar[dict] = {
         "board": {
             "fqbn": "arduino:avr:uno",
             "mcu": "atmega328p"
@@ -57,7 +58,7 @@ class Config:
                             config_data[section].update(values)
                         else:
                             config_data[section] = values
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 print(f"[!] Warning: Could not parse {self.config_path}: {e}", file=sys.stderr)
         return config_data
 
@@ -144,7 +145,7 @@ class Config:
             ]
             with open(self.config_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(lines))
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"[!] Warning: Could not update {self.config_path}: {e}", file=sys.stderr)
 
 # file dev-tools/ard26_cli/config.py ends

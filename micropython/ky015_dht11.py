@@ -5,6 +5,7 @@
 # Hardware: Signal -> Pin D2 / GPIO2 | VCC -> 3.3V/5V | GND -> GND
 
 import time
+
 import dht
 from machine import Pin
 
