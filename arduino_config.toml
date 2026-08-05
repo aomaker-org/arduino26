@@ -22,7 +22,7 @@ tools_dir = "tools"
 dev_tools_dir = "dev-tools"
 
 [state]
-last_compiled_sketch = "ky015_idiomatic"
+last_compiled_sketch = "ky015-ollama"
 active_method = "wsl"
 preferred_port = "/dev/ttyUSB0"
 
