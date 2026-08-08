@@ -29,9 +29,9 @@ void loop() {
       uint8_t sinkPin   = PINS[snkIdx];
 
       // Print step parameters to Serial Monitor
-      Serial.print(F("[*] Sourcing: D"));
+      Serial.print(F("D"));
       Serial.print(sourcePin);
-      Serial.print(F(" | Sinking: D"));
+      Serial.print(F(" -> D"));
       Serial.println(sinkPin);
 
       // 1. Configure active pair
