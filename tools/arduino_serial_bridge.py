@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-# ==============================================================================
-# Filename:     tools/arduino_serial_bridge.py
+# file: tools/arduino_serial_bridge.py
 # Purpose:      Arduino USB Serial Scanner, Passthrough & WSL2 Bridge Utility
 # Target OS:    Ubuntu 24.04 / 26.04 LTS / WSL2 / Windows 11
 # Lineage:      Arduino26 Hardware Interop
@@ -141,3 +139,5 @@ def audit_and_connect_arduino():
 if __name__ == "__main__":
     audit_and_connect_arduino()
     sys.exit(0)
+
+# file tools/arduino_serial_bridge.py ends
