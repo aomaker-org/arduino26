@@ -333,8 +333,37 @@ def cmd_monitor(args, cfg: Config):
         print(f"\n[*] Disconnected from {port}.")
         t_logger.close(status="Clean Exit (Ctrl+C)")
     except Exception as e:  # noqa: BLE001
-        print(f"[X] Serial Error on {port}: {e}", file=sys.stderr)
-        t_logger.close(status=f"Serial Error: {e}")
+        # If the port is locked/busy, fall back to tailing the log file
+        if "device or resource busy" in str(e).lower() or "could not open port" in str(e).lower():
+            # Find the latest active serial_telemetry session log
+            log_dir = cfg.root_dir / "agy" / "log"
+            logs = sorted(log_dir.glob("serial_telemetry_*.log"), key=os.path.getmtime)
+            
+            if logs:
+                latest_log = logs[-1]
+                print(f"[!] Port {port} is busy. Tailing latest session log: {latest_log.name}")
+                print("[*] Exit: Press Ctrl+C to stop tailing")
+                print("----------------------------------------------------------")
+                
+                try:
+                    with open(latest_log, "r", encoding="utf-8", errors="ignore") as lf:
+                        # Go to the end of the file
+                        lf.seek(0, 2)
+                        while True:
+                            curr_line = lf.readline()
+                            if not curr_line:
+                                time.sleep(0.1)
+                                continue
+                            print(curr_line.rstrip())
+                except KeyboardInterrupt:
+                    print("\n[*] Stopped tailing log.")
+                    sys.exit(0)
+            else:
+                print(f"[X] Port {port} is busy and no previous session logs found to tail.", file=sys.stderr)
+                sys.exit(1)
+        else:
+            print(f"[X] Serial Error on {port}: {e}", file=sys.stderr)
+            t_logger.close(status=f"Serial Error: {e}")
 
 
 def cmd_scan(args, cfg: Config):
