@@ -81,4 +81,16 @@ This file tracks planned features, architectural considerations, and open backlo
 
 ---
 
+### Item #007: [ ] Closed-Loop LED Pinout Discovery via Light Sensor
+- **Category:** Hardware Diagnostic Systems
+- **Date Added:** 2026-08-08
+- **Status:** `[ ]` Unscheduled
+- **Description:** Implement a closed-loop diagnostic routine to automate pin mapping.
+- **Implementation Strategy:**
+  - **Sensor Interface:** Connect an LDR / photoresistor voltage divider to analog input `A0`.
+  - **Feedback Routine:** During the ternary search loop, read the analog ADC value on `A0` for each permutation.
+  - **Threshold Detection:** Automatically flag and log configurations that result in a light intensity delta exceeding a defined calibration threshold, outputting confirmation messages to the serial monitor.
+
+---
+
 <!-- file docs/todo_backlog.md ends -->
