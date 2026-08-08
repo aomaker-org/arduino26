@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Path:        dev-tools/provision_environment.sh
+# file: dev-tools/provision_environment.sh
 # Purpose:     Bootstrap & provision complete embedded workspace dependencies:
 #              - C/C++: arduino-cli, avrdude, gcc-avr, avr-libc
 #              - Rust: rustup, nightly toolchain, rust-src, avr-none target
@@ -9,7 +8,6 @@
 # Target OS:   Ubuntu 24.04 / 26.04 LTS (WSL2) + Windows 11 Host
 # Lineage:     Arduino26 Environment Provisioning
 # Updated:     2026-07-31
-# ==============================================================================
 
 set -euo pipefail
 

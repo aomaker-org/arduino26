@@ -71,8 +71,7 @@ workflows, and repository hygiene for all assistants operating within the
 
 ## 5. Line Wrapping & Formatting Standards
 
-- **Prose & Markdown:** Wrap documentation, comments, and text files to **80 columns**
-  (hard max of 120 columns) for clean terminal rendering and diffs.
+- **Prose & Markdown:** Format text files to **80 columns** where possible (hard max of 120 columns) for clean terminal rendering and diffs.
 - **Source Code:** Standard formatting per language, keeping lines within 80–120
   columns where practical.
 - **Single-Line Copy-Paste Commands:** Format terminal commands on their own isolated
@@ -87,9 +86,18 @@ workflows, and repository hygiene for all assistants operating within the
 
 ## 6. Observability, Logging & FOSS Philosophy
 
-- **STRICT NO PIPE TO NULL:** NEVER pipe standard output or standard error to
-  `/dev/null`. Hide nothing. Route diagnostic output into timestamped logs under
-  `agy/log/` or `logs/` if terminal clutter must be reduced.
+- **STRICT NO PIPE OR REDIRECTION TO NULL:** NEVER redirect or pipe standard output,
+  standard error, or commands to NULL (e.g., `/dev/null`, `$null`, `NUL`, etc.). Hide nothing.
+  Route diagnostic output into timestamped logs under `agy/log/` or `logs/` if terminal
+  clutter must be reduced.
+- **TOOL LOGGING, QUIET MODE, AND TEE SUPPORT:** Most utility scripts and tooling
+  should support a `--quiet` or `-q` flag. Collect and log both stdout and stderr.
+  Implement a console "tee" pattern to write output stream logs to disk while optionally
+  displaying diagnostic milestones.
+- **STRICT TIMESTAMPS AND APPEND-ONLY LOGGING:** Log entries and file writes must
+  include precise ISO-8601 or HH:MM:SS timestamps. Don't overwrite existing logs.
+  Only append (`a` mode), rename, or generate new files. Never delete workspace files
+  unless explicitly requested by command arguments or directives.
 - **STRICT NO UNVERIFIED CURL PIPING:** NEVER pipe `curl` or `wget` downloads directly
   into `sh` or `bash` (`curl ... | sh`). Always download to an explicit temporary file,
   verify download completion, or use official package managers (`apt`, `uv`, `pip`, `winget`).

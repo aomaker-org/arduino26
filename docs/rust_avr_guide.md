@@ -1,3 +1,4 @@
+<!-- file: docs/rust_avr_guide.md -->
 # Arduino26 Rust AVR Architecture & Implementation Guide
 
 ## Overview

@@ -210,19 +210,14 @@ def cmd_upload(args, cfg: Config):
             logger.log_operation("upload", sketch_path.name, target_win_port, "SUCCESS", 0)
             return True
         else:
-            if "not recognized" in res.stderr or "CommandNotFoundException" in res.stderr or res.returncode != 0:
-                print(f"[!] Windows host upload failed on {target_win_port}.", file=sys.stderr)
-                print("----------------------------------------------------------", file=sys.stderr)
-                print("[i] 'arduino-cli' is not installed in your Windows 11 host environment.", file=sys.stderr)
-                print("[i] To install arduino-cli on Windows host, open PowerShell as Admin and run:", file=sys.stderr)
-                print("        winget install Arduino.cli", file=sys.stderr)
-                print("        arduino-cli core update-index && arduino-cli core install arduino:avr", file=sys.stderr)
-                print("----------------------------------------------------------", file=sys.stderr)
-                print("[i] Alternatively, attach your physical USB device (CH340) into WSL2:", file=sys.stderr)
-                print("        1. Open PowerShell on Windows host: pwsh.exe", file=sys.stderr)
-                print("        2. List connected USB devices:      usbipd list", file=sys.stderr)
-                print("        3. Attach device to WSL2:           usbipd attach --wsl --busid <BUSID>", file=sys.stderr)
-                print("----------------------------------------------------------", file=sys.stderr)
+            print(f"[!] Windows host upload failed on {target_win_port}.", file=sys.stderr)
+            print("----------------------------------------------------------", file=sys.stderr)
+            print("[i] Alternatively, attach your physical USB device (CH340) into WSL2:", file=sys.stderr)
+            print("    pwsh.exe -Command \"usbipd list; echo 'Run: usbipd attach --wsl --busid <BUSID>'\"", file=sys.stderr)
+            print("----------------------------------------------------------", file=sys.stderr)
+            print("[i] To install arduino-cli on Windows host, open PowerShell as Admin and run:", file=sys.stderr)
+            print("    winget install Arduino.cli && arduino-cli core update-index && arduino-cli core install arduino:avr", file=sys.stderr)
+            print("----------------------------------------------------------", file=sys.stderr)
             logger.log_operation("upload", sketch_path.name, target_win_port, "FAILED", res.returncode)
             return False
 
@@ -463,11 +458,21 @@ def cmd_run(args, cfg: Config):
 def main():
     cfg = Config()
 
-    # Pre-process sys.argv to handle multi-subcommand chaining like:
-    # "ard26 compile upload monitor sketches/uno_clone_diag"
+    # Pre-process sys.argv to handle multi-subcommand chaining or auto-infer 'run'
     argv = sys.argv[1:]
+    valid_cmds = {"compile", "upload", "monitor", "run", "scan", "config", "attach"}
+    
+    # Auto-infer 'run' if the first argument is not a subcommand and looks like a sketch
+    if (argv and argv[0] not in valid_cmds and not argv[0].startswith("-") and
+        ((cfg.root_dir / "sketches" / argv[0]).is_dir() or
+         (cfg.root_dir / "rust" / argv[0]).is_dir() or
+         Path(argv[0]).is_dir() or
+         Path(argv[0]).is_file())):
+        print(f"[*] Inferring 'run' command for sketch: {argv[0]}")
+        sys.argv.insert(1, "run")
+        argv = sys.argv[1:]
+
     if len(argv) >= 2:
-        valid_cmds = {"compile", "upload", "monitor", "run", "attach"}
         cmds_found = []
         sketch_found = None
 

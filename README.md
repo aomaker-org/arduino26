@@ -82,7 +82,9 @@ arduino26/
 │   ├── patch_io.py               # Input/Output bridge wrapper
 │   ├── win11_monitor.sh          # Wrapper for win11_serial_monitor.ps1 (Bypass)
 │   ├── pwsh_wrapper.sh           # PowerShell ExecutionPolicy Bypass wrapper
+│   ├── lint_hygiene.py           # Workspace header, footer, & line width checker
 │   └── provision_environment.sh  # Automated environment bootstrap script
+├── logs/                         # Timestamped linter validation logs
 ├── sketches/                     # Arduino C++ sketch projects
 │   ├── uno_blink/                # Standard Uno blink sketch (.ino)
 │   ├── uno_clone_diag/           # Hardware diagnostic sketch (.ino)

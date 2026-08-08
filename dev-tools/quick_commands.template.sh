@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Path:        dev-tools/quick_commands.template.sh
+# file: dev-tools/quick_commands.template.sh
 # Purpose:     Template file containing ready-to-copy single-line commands
 #              Copy or uncomment lines to customize your environment workflows.
 # Target OS:   Ubuntu 24.04 / 26.04 LTS (WSL2) + Windows 11 Host
 # Updated:     2026-07-31
-# ==============================================================================
 
 # ------------------------------------------------------------------------------
 # 1. Environment Loading & Tagging (Triple-click any line to copy)

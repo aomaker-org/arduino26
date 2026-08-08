@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# Filename:     tools/patch_io.py
+# file: dev-tools/patch_io.py
 # Purpose:      Bridge wrapper for input (clip2files) and output (files2clip)
 # Target OS:    Ubuntu 24.04 / 26.04 LTS / WSL2 / Linux Native
 # Lineage:      Arduino26 Infrastructure
@@ -51,3 +50,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# file dev-tools/patch_io.py ends
