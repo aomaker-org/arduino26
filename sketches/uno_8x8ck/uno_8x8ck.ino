@@ -7,6 +7,9 @@ const unsigned long ON_TIME_MS  = 200;
 const unsigned long OFF_TIME_MS = 20;
 
 void setup() {
+  Serial.begin(115200);
+  Serial.println(F("--- Arduino Uno 8x8 Matrix Pin Mapping Diagnostic ---"));
+
   // Set all pins to INPUT (High-Impedance / Tri-state) initially
   for (uint8_t i = 0; i < 4; i++) {
     pinMode(PINS[i], INPUT);
@@ -24,6 +27,12 @@ void loop() {
 
       uint8_t sourcePin = PINS[srcIdx];
       uint8_t sinkPin   = PINS[snkIdx];
+
+      // Print step parameters to Serial Monitor
+      Serial.print(F("[*] Sourcing: D"));
+      Serial.print(sourcePin);
+      Serial.print(F(" | Sinking: D"));
+      Serial.println(sinkPin);
 
       // 1. Configure active pair
       pinMode(sourcePin, OUTPUT);
