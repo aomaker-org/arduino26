@@ -17,41 +17,61 @@ void setup() {
 }
 
 void loop() {
-  // Iterate through source pins
+  // Iterate through each pin as the single Source (HIGH)
   for (uint8_t srcIdx = 0; srcIdx < 4; srcIdx++) {
-    // Iterate through sink pins
-    for (uint8_t snkIdx = 0; snkIdx < 4; snkIdx++) {
+    uint8_t sourcePin = PINS[srcIdx];
+
+    // For the remaining 3 pins, iterate through all 2^3 = 8 state combinations
+    // representing whether they are active sinks (1) or Tri-state/High-Z (0)
+    for (uint8_t stateMask = 1; stateMask < 8; stateMask++) {
       
-      // Skip driving a pin against itself
-      if (srcIdx == snkIdx) continue;
+      // Determine which pins are sinks in this permutation
+      uint8_t sinkPins[3];
+      uint8_t sinkCount = 0;
+      uint8_t otherIdx = 0;
 
-      uint8_t sourcePin = PINS[srcIdx];
-      uint8_t sinkPin   = PINS[snkIdx];
+      for (uint8_t i = 0; i < 4; i++) {
+        if (i == srcIdx) continue;
+        // Check if the i-th pin's bit is active in the stateMask
+        if ((stateMask >> otherIdx) & 0x01) {
+          sinkPins[sinkCount++] = PINS[i];
+        }
+        otherIdx++;
+      }
 
-      // Print step parameters to Serial Monitor
+      // Print current state sequence
       Serial.print(F("D"));
       Serial.print(sourcePin);
-      Serial.print(F(" -> D"));
-      Serial.println(sinkPin);
+      Serial.print(F(" -> ["));
+      for (uint8_t s = 0; s < sinkCount; s++) {
+        Serial.print(F("D"));
+        Serial.print(sinkPins[s]);
+        if (s < sinkCount - 1) Serial.print(F(", "));
+      }
+      Serial.println(F("]"));
 
-      // 1. Configure active pair
+      // 1. Configure the single Source pin
       pinMode(sourcePin, OUTPUT);
-      digitalWrite(sourcePin, HIGH); // Source current
+      digitalWrite(sourcePin, HIGH);
 
-      pinMode(sinkPin, OUTPUT);
-      digitalWrite(sinkPin, LOW);   // Sink current
+      // 2. Configure active Sink pins
+      for (uint8_t s = 0; s < sinkCount; s++) {
+        pinMode(sinkPins[s], OUTPUT);
+        digitalWrite(sinkPins[s], LOW);
+      }
 
-      // 2. Pulse ON for 1 ms
+      // 3. Pulse ON
       delay(ON_TIME_MS);
 
-      // 3. Return active pair to High Impedance
-      digitalWrite(sourcePin, LOW);  // Disable internal pull-up/drive
-      pinMode(sourcePin, INPUT);     // High-Z
+      // 4. Return all active pins to High-Z Tri-state
+      digitalWrite(sourcePin, LOW);
+      pinMode(sourcePin, INPUT);
+      for (uint8_t s = 0; s < sinkCount; s++) {
+        digitalWrite(sinkPins[s], LOW);
+        pinMode(sinkPins[s], INPUT);
+      }
 
-      digitalWrite(sinkPin, LOW);
-      pinMode(sinkPin, INPUT);       // High-Z
-
-      // 4. Dead time OFF for 10 ms
+      // 5. Dead time OFF
       delay(OFF_TIME_MS);
     }
   }
