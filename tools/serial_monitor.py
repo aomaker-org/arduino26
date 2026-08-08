@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
-# ==============================================================================
-# Path:        tools/serial_monitor.py
+# file: tools/serial_monitor.py
 # Purpose:     Bi-directional Serial Terminal & Telemetry Logger for Arduino/CH340
 # Target OS:   Ubuntu 24.04 / 26.04 LTS (WSL2 / Linux Native)
 # Lineage:     Arduino26 Infrastructure
 # Updated:     2026-07-31
-# ==============================================================================
 
 import argparse
 import sys
@@ -115,3 +112,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# file tools/serial_monitor.py ends
