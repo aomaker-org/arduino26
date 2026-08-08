@@ -3,7 +3,7 @@
 const uint8_t PINS[4] = {2, 3, 4, 5};
 
 // Delay constants
-const unsigned long ON_TIME_MS  = 100;
+const unsigned long ON_TIME_MS  = 200;
 const unsigned long OFF_TIME_MS = 20;
 
 void setup() {
