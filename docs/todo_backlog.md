@@ -70,4 +70,15 @@ This file tracks planned features, architectural considerations, and open backlo
 
 ---
 
+### Item #006: [+] 8x8 Display Pin Mapping & Driver Architecture
+- **Category:** Hardware Integration & Embedded Drivers
+- **Date Added:** 2026-08-08
+- **Status:** `[+]` High Priority
+- **Description:** Complete mapping of D2, D3, D4, and D5 to the actual physical pins of the 8x8 Common Anode display.
+- **Architectural Scope & Drive Experiments:**
+  - **Mux/Demux Driver Integration:** Integrate output pin control logic (e.g. shift registers like the 74HC595, or decade counters) to scale pin control to drive all 64 red/green LEDs.
+  - **Multi-Source Permutations:** Experiment with driving multiple pins simultaneously (e.g. 3 source pins HIGH, 1 sink pin LOW) to evaluate column/row grouping, multiplexing limits, and duty cycle adjustments.
+
+---
+
 <!-- file docs/todo_backlog.md ends -->
