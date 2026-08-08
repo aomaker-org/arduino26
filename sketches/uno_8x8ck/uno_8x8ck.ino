@@ -3,10 +3,13 @@
 const uint8_t PINS[4] = {2, 3, 4, 5};
 
 // Delay constants
-const unsigned long ON_TIME_MS  = 500;
-const unsigned long OFF_TIME_MS = 100;
+const unsigned long ON_TIME_MS  = 400;
+const unsigned long OFF_TIME_MS = 20;
 
 void setup() {
+  Serial.begin(115200);
+  Serial.println(F("--- Arduino Uno 8x8 Matrix Pin Mapping Diagnostic ---"));
+
   // Set all pins to INPUT (High-Impedance / Tri-state) initially
   for (uint8_t i = 0; i < 4; i++) {
     pinMode(PINS[i], INPUT);
@@ -14,37 +17,74 @@ void setup() {
 }
 
 void loop() {
-  // Iterate through source pins
-  for (uint8_t srcIdx = 0; srcIdx < 4; srcIdx++) {
-    // Iterate through sink pins
-    for (uint8_t snkIdx = 0; snkIdx < 4; snkIdx++) {
-      
-      // Skip driving a pin against itself
-      if (srcIdx == snkIdx) continue;
+  // Generate all 3^4 = 81 state permutations for the 4 pins
+  // Pin states: 0 = Tri-state (INPUT), 1 = Source (OUTPUT HIGH), 2 = Sink (OUTPUT LOW)
+  for (uint8_t stateVal = 0; stateVal < 81; stateVal++) {
+    uint8_t pinStates[4]; // 0=Tri, 1=Src, 2=Snk
+    uint8_t temp = stateVal;
+    
+    uint8_t srcCount = 0;
+    uint8_t snkCount = 0;
 
-      uint8_t sourcePin = PINS[srcIdx];
-      uint8_t sinkPin   = PINS[snkIdx];
-
-      // 1. Configure active pair
-      pinMode(sourcePin, OUTPUT);
-      digitalWrite(sourcePin, HIGH); // Source current
-
-      pinMode(sinkPin, OUTPUT);
-      digitalWrite(sinkPin, LOW);   // Sink current
-
-      // 2. Pulse ON for 1 ms
-      delay(ON_TIME_MS);
-
-      // 3. Return active pair to High Impedance
-      digitalWrite(sourcePin, LOW);  // Disable internal pull-up/drive
-      pinMode(sourcePin, INPUT);     // High-Z
-
-      digitalWrite(sinkPin, LOW);
-      pinMode(sinkPin, INPUT);       // High-Z
-
-      // 4. Dead time OFF for 10 ms
-      delay(OFF_TIME_MS);
+    for (uint8_t i = 0; i < 4; i++) {
+      pinStates[i] = temp % 3;
+      temp /= 3;
+      if (pinStates[i] == 1) srcCount++;
+      if (pinStates[i] == 2) snkCount++;
     }
+
+    // Filter: must have 1-3 sources AND 1-3 sinks (e.g. at least one of each)
+    if (srcCount < 1 || srcCount > 3 || snkCount < 1 || snkCount > 3) {
+      continue;
+    }
+
+    // Print current state configuration
+    Serial.print(F("["));
+    bool firstSrc = true;
+    for (uint8_t i = 0; i < 4; i++) {
+      if (pinStates[i] == 1) {
+        if (!firstSrc) Serial.print(F(", "));
+        Serial.print(F("D"));
+        Serial.print(PINS[i]);
+        firstSrc = false;
+      }
+    }
+    Serial.print(F("] -> ["));
+    bool firstSnk = true;
+    for (uint8_t i = 0; i < 4; i++) {
+      if (pinStates[i] == 2) {
+        if (!firstSnk) Serial.print(F(", "));
+        Serial.print(F("D"));
+        Serial.print(PINS[i]);
+        firstSnk = false;
+      }
+    }
+    Serial.println(F("]"));
+
+    // 1. Configure Pin Modes & Outputs
+    for (uint8_t i = 0; i < 4; i++) {
+      if (pinStates[i] == 1) {
+        pinMode(PINS[i], OUTPUT);
+        digitalWrite(PINS[i], HIGH);
+      } else if (pinStates[i] == 2) {
+        pinMode(PINS[i], OUTPUT);
+        digitalWrite(PINS[i], LOW);
+      } else {
+        pinMode(PINS[i], INPUT);
+      }
+    }
+
+    // 2. Pulse ON
+    delay(ON_TIME_MS);
+
+    // 3. Reset all to High-Z Tri-state
+    for (uint8_t i = 0; i < 4; i++) {
+      digitalWrite(PINS[i], LOW);
+      pinMode(PINS[i], INPUT);
+    }
+
+    // 4. Dead time OFF
+    delay(OFF_TIME_MS);
   }
 }
 

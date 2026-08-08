@@ -70,4 +70,27 @@ This file tracks planned features, architectural considerations, and open backlo
 
 ---
 
+### Item #006: [+] 8x8 Display Pin Mapping & Driver Architecture
+- **Category:** Hardware Integration & Embedded Drivers
+- **Date Added:** 2026-08-08
+- **Status:** `[+]` High Priority
+- **Description:** Complete mapping of D2, D3, D4, and D5 to the actual physical pins of the 8x8 Common Anode display.
+- **Architectural Scope & Drive Experiments:**
+  - **Mux/Demux Driver Integration:** Integrate output pin control logic (e.g. shift registers like the 74HC595, or decade counters) to scale pin control to drive all 64 red/green LEDs.
+  - **Multi-Source Permutations:** Experiment with driving multiple pins simultaneously (e.g. 3 source pins HIGH, 1 sink pin LOW) to evaluate column/row grouping, multiplexing limits, and duty cycle adjustments.
+
+---
+
+### Item #007: [ ] Closed-Loop LED Pinout Discovery via Light Sensor
+- **Category:** Hardware Diagnostic Systems
+- **Date Added:** 2026-08-08
+- **Status:** `[ ]` Unscheduled
+- **Description:** Implement a closed-loop diagnostic routine to automate pin mapping.
+- **Implementation Strategy:**
+  - **Sensor Interface:** Connect an LDR / photoresistor voltage divider to analog input `A0`.
+  - **Feedback Routine:** During the ternary search loop, read the analog ADC value on `A0` for each permutation.
+  - **Threshold Detection:** Automatically flag and log configurations that result in a light intensity delta exceeding a defined calibration threshold, outputting confirmation messages to the serial monitor.
+
+---
+
 <!-- file docs/todo_backlog.md ends -->
