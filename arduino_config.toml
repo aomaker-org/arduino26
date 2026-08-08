@@ -21,8 +21,12 @@ sketches_dir = "sketches"
 tools_dir = "tools"
 dev_tools_dir = "dev-tools"
 
+[tools]
+make_uses_ard26 = false
+delta_timestamps = true
+
 [state]
-last_compiled_sketch = "ky015-ollama"
+last_compiled_sketch = "uno_8x8ck"
 active_method = "wsl"
 preferred_port = "/dev/ttyUSB0"
 

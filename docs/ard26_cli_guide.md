@@ -54,11 +54,25 @@ sketches_dir = "sketches"
 tools_dir = "tools"
 dev_tools_dir = "dev-tools"
 
+[tools]
+make_uses_ard26 = false
+
 [state]
 last_compiled_sketch = "uno_clone_diag"
 active_method = "win_failover"
 preferred_port = "COM5"
 ```
+
+---
+
+## 🏗️ Makefile Integration & Precedence Override Hierarchy
+
+When invoking workflow pipelines using the `Makefile` (e.g. `make run`), the tool utilized to execute commands is determined by a hierarchy of sources:
+
+1. **Command-line argument override:** Passing `ARD26_MAKE_USES_ARD26=1` (or `0`) directly to the make invocation (e.g. `make run ARD26_MAKE_USES_ARD26=1`).
+2. **Environment variable override:** Having `export ARD26_MAKE_USES_ARD26=1` set in the active shell environment.
+3. **Local configuration file:** Reading the `make_uses_ard26` boolean under `[tools]` in [`arduino_config.toml`](file:///home/fekerr/src/arduino26/arduino_config.toml).
+4. **Default fallback:** Executes command directly via python module (`python3 -m ard26_cli.cli`) to ensure out-of-the-box compatibility without sourcing requirements.
 
 ---
 

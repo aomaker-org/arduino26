@@ -38,6 +38,10 @@ class Config:
             "sketches_dir": "sketches",
             "tools_dir": "tools",
             "dev_tools_dir": "dev-tools"
+        },
+        "tools": {
+            "make_uses_ard26": False,
+            "delta_timestamps": True
         }
     }
 
@@ -81,6 +85,14 @@ class Config:
     @property
     def baud_default(self) -> int:
         return self.data.get("baud", {}).get("default", 115200)
+
+    @property
+    def make_uses_ard26(self) -> bool:
+        return self.data.get("tools", {}).get("make_uses_ard26", False)
+
+    @property
+    def delta_timestamps(self) -> bool:
+        return self.data.get("tools", {}).get("delta_timestamps", True)
 
     @property
     def last_compiled_sketch(self) -> str:
@@ -134,6 +146,10 @@ class Config:
                 f'sketches_dir = "{self.data.get("paths", {}).get("sketches_dir", "sketches")}"',
                 f'tools_dir = "{self.data.get("paths", {}).get("tools_dir", "tools")}"',
                 f'dev_tools_dir = "{self.data.get("paths", {}).get("dev_tools_dir", "dev-tools")}"',
+                "",
+                "[tools]",
+                f'make_uses_ard26 = {str(self.make_uses_ard26).lower()}',
+                f'delta_timestamps = {str(self.delta_timestamps).lower()}',
                 "",
                 "[state]",
                 f'last_compiled_sketch = "{self.last_compiled_sketch}"',
