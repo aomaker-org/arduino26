@@ -3,8 +3,8 @@
 # Target OS: Ubuntu 24.04 / 26.04 LTS (WSL2) + Windows 11 Host
 
 [board]
-fqbn = "arduino:avr:uno"
-mcu = "atmega328p"
+fqbn = "arduino:avr:leonardo"
+mcu = "atmega32u4"
 
 [port]
 wsl = "/dev/ttyUSB0"
