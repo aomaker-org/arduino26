@@ -21,6 +21,23 @@ except ImportError:
     serial = None
 
 
+def flush_input_buffer():
+    """Flushes and prints any pending characters in stdin buffer to prevent accidental prompt responses."""
+    import select
+    flushed = ""
+    try:
+        # Keep reading from stdin while data is available (non-blocking)
+        while select.select([sys.stdin], [], [], 0.0)[0]:
+            char = sys.stdin.read(1)
+            if not char:
+                break
+            flushed += char
+    except Exception:
+        pass
+    if flushed:
+        print(f"[i] Flushed accidental input: {repr(flushed)}")
+
+
 def find_arduino_cli() -> str | None:
     """Finds arduino-cli binary in PATH or ~/.local/bin."""
     path = shutil.which("arduino-cli")
@@ -125,6 +142,7 @@ def cmd_upload(args, cfg: Config):
         target_name = cfg.last_compiled_sketch
         if sys.stdin.isatty():
             try:
+                flush_input_buffer()
                 ans = input(f"Upload the last compiled sketch [{target_name}]? [Y/n] ").strip()
                 if ans and not ans.lower().startswith('y'):
                     print("[!] Upload canceled.")
@@ -266,6 +284,7 @@ def cmd_upload(args, cfg: Config):
         should_failover = False
         if sys.stdin.isatty():
             try:
+                flush_input_buffer()
                 ans = input(f"Failover to Windows 11 host environment ({win_port})? [Y/n] ").strip()
                 if not ans or ans.lower().startswith('y'):
                     should_failover = True
