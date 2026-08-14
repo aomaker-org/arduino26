@@ -73,8 +73,8 @@ def trigger_reset_via_host(com_port: str):
     """Sends the reset trigger to the Uno on a Windows COM port."""
     print(f"[*] Sending reset trigger to Uno on host port {com_port}...")
     cmd = (
-        f"\\\\\$p = New-Object System.IO.Ports.SerialPort {com_port}, 115200; "
-        f"\\\\\$p.Open(); \\\\\$p.Write('r'); Start-Sleep -Milliseconds 250; \\\\\$p.Close()"
+        f"$p = New-Object System.IO.Ports.SerialPort {com_port}, 115200; "
+        f"$p.Open(); $p.Write('r'); Start-Sleep -Milliseconds 250; $p.Close()"
     )
     run_host_cmd(cmd)
 
