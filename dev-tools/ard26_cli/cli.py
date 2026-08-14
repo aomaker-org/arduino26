@@ -228,7 +228,7 @@ def cmd_upload(args, cfg: Config):
             
         ps_cmd = [
             "pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
-            f"{arduino_bin} upload -p {target_win_port} --fqbn {fqbn} '{win_sketch_path}'"
+            f"{arduino_bin} compile --upload -p {target_win_port} --fqbn {fqbn} '{win_sketch_path}'"
         ]
         res = subprocess.run(ps_cmd, capture_output=True, text=True, check=False)
         if res.returncode == 0:
