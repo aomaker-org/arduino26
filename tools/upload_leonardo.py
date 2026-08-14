@@ -135,16 +135,27 @@ def main():
         print("==========================================================")
         print("                 Manual Leonardo Upload Mode")
         print("==========================================================")
-        print("[1] Press the physical RESET button on the Leonardo board.")
-        print("[2] Wait for the host Windows disconnect/reconnect beeps.")
-        print("[3] Press ENTER immediately to initiate upload...")
-        input() # Wait for user signal
+        print("[*] Please press the physical RESET button on the Leonardo board now...")
         
-        # Scan and upload immediately
-        active_port = wait_for_port(timeout_sec=5.0)
-        if not active_port:
-            print("[X] Port not found or not accessible. Make sure it's attached to WSL.")
+        # 1. Wait for manual disconnect
+        disappeared = wait_for_disappearance(touch_port, timeout_sec=20.0)
+        if not disappeared:
+            print("[X] Manual reset not detected (device did not disconnect).")
             sys.exit(1)
+            
+        # 2. Wait for reconnect
+        active_port = wait_for_port(timeout_sec=25.0)
+        if not active_port:
+            print("[X] Timeout waiting for Leonardo serial port to reappear.")
+            print("[i] Check if usbipd auto-attach loop is running and attached the device.")
+            sys.exit(1)
+            
+        # 3. Settle delay
+        settle_delay = 1.0
+        print(f"[*] Settle delay: waiting {settle_delay}s for device initialization...")
+        time.sleep(settle_delay)
+        
+        # 4. Perform upload
         run_upload(sketch_path, active_port)
         return
         
