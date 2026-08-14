@@ -15,7 +15,7 @@ echo "[*] Step 1: Compiling sketch on Windows host..."
 
 # Step 2: Trigger bootloader reset on host
 echo "[*] Step 2: Triggering 1200bps touch reset on COM6..."
-./dev-tools/pwsh_wrapper.sh -Command "$p = New-Object System.IO.Ports.SerialPort COM6, 1200; $p.Open(); $p.Close()"
+./dev-tools/pwsh_wrapper.sh -Command "\$p = New-Object System.IO.Ports.SerialPort COM6, 1200; \$p.Open(); \$p.Close()"
 
 # Step 3: Wait exactly 1.5s for Windows to re-enumerate COM6 in bootloader mode
 echo "[*] Step 3: Waiting 1.5s for bootloader port to reappear..."
