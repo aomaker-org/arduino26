@@ -199,9 +199,18 @@ def cmd_upload(args, cfg: Config):
     def run_windows_upload(target_win_port: str) -> bool:
         """Executes upload on Windows host via pwsh.exe with UNC path support."""
         print(f"[*] Executing Windows host upload to {target_win_port}...")
+        arduino_bin = "arduino-cli"
+        # Check standard Windows installation path to bypass PATH refresh issues
+        win_std_bin = r"C:\Program Files\Arduino CLI\arduino-cli.exe"
+        # Since we are running in WSL, check using Windows path syntax for existence from Windows perspective
+        # or check if the mount path exists (/mnt/c/Program Files/Arduino CLI/arduino-cli.exe)
+        wsl_mount_bin = Path("/mnt/c/Program Files/Arduino CLI/arduino-cli.exe")
+        if wsl_mount_bin.exists():
+            arduino_bin = f"& '{win_std_bin}'"
+            
         ps_cmd = [
             "pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
-            f"arduino-cli upload -p {target_win_port} --fqbn {fqbn} '{win_sketch_path}'"
+            f"{arduino_bin} upload -p {target_win_port} --fqbn {fqbn} '{win_sketch_path}'"
         ]
         res = subprocess.run(ps_cmd, capture_output=True, text=True, check=False)
         if res.returncode == 0:
