@@ -86,11 +86,12 @@ def cmd_reset(args):
         print("[X] Error: Could not locate Uno Controller in devices list.")
         sys.exit(1)
         
-    # Extract COM port from name (e.g. "USB-SERIAL CH340 (COM8)")
+    # Extract COM port from name or state (e.g. "USB-SERIAL" and "CH340 (COM8)")
     import re
-    match = re.search(r"COM\d+", uno["name"])
+    combined_str = f"{uno['name']} {uno['state']}"
+    match = re.search(r"COM\d+", combined_str)
     if not match:
-        print(f"[X] Error: Could not identify COM port for Uno in name: {uno['name']}")
+        print(f"[X] Error: Could not identify COM port for Uno in device details: {combined_str}")
         sys.exit(1)
         
     com_port = match.group(0)
