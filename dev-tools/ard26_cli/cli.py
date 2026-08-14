@@ -220,6 +220,10 @@ def cmd_upload(args, cfg: Config):
             return True
         else:
             print(f"[!] Windows host upload failed on {target_win_port}.", file=sys.stderr)
+            if res.stdout:
+                print(res.stdout)
+            if res.stderr:
+                print(res.stderr, file=sys.stderr)
             print("----------------------------------------------------------", file=sys.stderr)
             print("[i] Alternatively, attach your physical USB device (CH340) into WSL2:", file=sys.stderr)
             print("    pwsh.exe -Command \"usbipd list; echo 'Run: usbipd attach --wsl --busid <BUSID>'\"", file=sys.stderr)
