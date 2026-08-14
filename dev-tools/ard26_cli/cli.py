@@ -21,6 +21,23 @@ except ImportError:
     serial = None
 
 
+def flush_input_buffer():
+    """Flushes and prints any pending characters in stdin buffer to prevent accidental prompt responses."""
+    import select
+    flushed = ""
+    try:
+        # Keep reading from stdin while data is available (non-blocking)
+        while select.select([sys.stdin], [], [], 0.0)[0]:
+            char = sys.stdin.read(1)
+            if not char:
+                break
+            flushed += char
+    except Exception:
+        pass
+    if flushed:
+        print(f"[i] Flushed accidental input: {repr(flushed)}")
+
+
 def find_arduino_cli() -> str | None:
     """Finds arduino-cli binary in PATH or ~/.local/bin."""
     path = shutil.which("arduino-cli")
@@ -125,6 +142,7 @@ def cmd_upload(args, cfg: Config):
         target_name = cfg.last_compiled_sketch
         if sys.stdin.isatty():
             try:
+                flush_input_buffer()
                 ans = input(f"Upload the last compiled sketch [{target_name}]? [Y/n] ").strip()
                 if ans and not ans.lower().startswith('y'):
                     print("[!] Upload canceled.")
@@ -199,9 +217,18 @@ def cmd_upload(args, cfg: Config):
     def run_windows_upload(target_win_port: str) -> bool:
         """Executes upload on Windows host via pwsh.exe with UNC path support."""
         print(f"[*] Executing Windows host upload to {target_win_port}...")
+        arduino_bin = "arduino-cli"
+        # Check standard Windows installation path to bypass PATH refresh issues
+        win_std_bin = r"C:\Program Files\Arduino CLI\arduino-cli.exe"
+        # Since we are running in WSL, check using Windows path syntax for existence from Windows perspective
+        # or check if the mount path exists (/mnt/c/Program Files/Arduino CLI/arduino-cli.exe)
+        wsl_mount_bin = Path("/mnt/c/Program Files/Arduino CLI/arduino-cli.exe")
+        if wsl_mount_bin.exists():
+            arduino_bin = f"& '{win_std_bin}'"
+            
         ps_cmd = [
             "pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
-            f"arduino-cli upload -p {target_win_port} --fqbn {fqbn} '{win_sketch_path}'"
+            f"{arduino_bin} compile --upload -p {target_win_port} --fqbn {fqbn} '{win_sketch_path}'"
         ]
         res = subprocess.run(ps_cmd, capture_output=True, text=True, check=False)
         if res.returncode == 0:
@@ -211,6 +238,10 @@ def cmd_upload(args, cfg: Config):
             return True
         else:
             print(f"[!] Windows host upload failed on {target_win_port}.", file=sys.stderr)
+            if res.stdout:
+                print(res.stdout)
+            if res.stderr:
+                print(res.stderr, file=sys.stderr)
             print("----------------------------------------------------------", file=sys.stderr)
             print("[i] Alternatively, attach your physical USB device (CH340) into WSL2:", file=sys.stderr)
             print("    pwsh.exe -Command \"usbipd list; echo 'Run: usbipd attach --wsl --busid <BUSID>'\"", file=sys.stderr)
@@ -253,6 +284,7 @@ def cmd_upload(args, cfg: Config):
         should_failover = False
         if sys.stdin.isatty():
             try:
+                flush_input_buffer()
                 ans = input(f"Failover to Windows 11 host environment ({win_port})? [Y/n] ").strip()
                 if not ans or ans.lower().startswith('y'):
                     should_failover = True

@@ -3,12 +3,12 @@
 # Target OS: Ubuntu 24.04 / 26.04 LTS (WSL2) + Windows 11 Host
 
 [board]
-fqbn = "arduino:avr:uno"
-mcu = "atmega328p"
+fqbn = "arduino:avr:leonardo"
+mcu = "atmega32u4"
 
 [port]
-wsl = "/dev/ttyUSB0"
-win = "COM5"
+wsl = "/dev/ttyACM0"
+win = "COM6"
 autodetect = true
 
 [baud]
@@ -26,8 +26,8 @@ make_uses_ard26 = false
 delta_timestamps = true
 
 [state]
-last_compiled_sketch = "uno_8x8ck"
+last_compiled_sketch = "leo_component_test"
 active_method = "wsl"
-preferred_port = "/dev/ttyUSB0"
+preferred_port = "/dev/ttyACM0"
 
 # file arduino_config.toml ends
