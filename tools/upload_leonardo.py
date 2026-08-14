@@ -137,8 +137,8 @@ def main():
         print("==========================================================")
         print("[*] Please press the physical RESET button on the Leonardo board now...")
         
-        # 1. Wait for manual disconnect
-        disappeared = wait_for_disappearance(touch_port, timeout_sec=20.0)
+        # 1. Wait for manual disconnect (120s timeout to allow user time to trigger)
+        disappeared = wait_for_disappearance(touch_port, timeout_sec=120.0)
         if not disappeared:
             print("[X] Manual reset not detected (device did not disconnect).")
             sys.exit(1)
