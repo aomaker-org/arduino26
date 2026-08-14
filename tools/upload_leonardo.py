@@ -97,7 +97,7 @@ def main():
     wait_for_disappearance(touch_port, timeout_sec=5.0)
     
     # 3. Wait for reconnect
-    active_port = wait_for_port(timeout_sec=10.0)
+    active_port = wait_for_port(timeout_sec=25.0)
     if not active_port:
         print("[X] Timeout waiting for Leonardo serial port to reappear.")
         print("[i] Check if usbipd auto-attach loop is running and attached the device.")
