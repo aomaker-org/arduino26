@@ -82,15 +82,36 @@ def run_upload(sketch_path: str, port: str):
         sys.exit(res.returncode)
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 tools/upload_leonardo.py <sketch_path> [touch_port]")
-        sys.exit(1)
-        
-    sketch_path = sys.argv[1]
-    touch_port = sys.argv[2] if len(sys.argv) > 2 else "/dev/ttyACM0"
+    import argparse
+    parser = argparse.ArgumentParser(description="Leonardo bootloader reset and upload helper.")
+    parser.add_argument("sketch", help="Path to sketch directory")
+    parser.add_argument("-p", "--port", default="/dev/ttyACM0", help="Target serial port (default: /dev/ttyACM0)")
+    parser.add_argument("--manual", action="store_true", help="Manual reset mode (press button and hit enter)")
     
+    args = parser.parse_args()
+    
+    sketch_path = args.sketch
+    touch_port = args.port
+    
+    if args.manual:
+        print("==========================================================")
+        print("                 Manual Leonardo Upload Mode")
+        print("==========================================================")
+        print("[1] Press the physical RESET button on the Leonardo board.")
+        print("[2] Wait for the host Windows disconnect/reconnect beeps.")
+        print("[3] Press ENTER immediately to initiate upload...")
+        input() # Wait for user signal
+        
+        # Scan and upload immediately
+        active_port = wait_for_port(timeout_sec=5.0)
+        if not active_port:
+            print("[X] Port not found or not accessible. Make sure it's attached to WSL.")
+            sys.exit(1)
+        run_upload(sketch_path, active_port)
+        return
+        
+    # Standard automatic mode
     # 1. Trigger the bootloader
-    t_start = time.time()
     trigger_1200bps_touch(touch_port)
     
     # 2. Monitor disconnect
