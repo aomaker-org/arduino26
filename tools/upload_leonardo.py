@@ -11,6 +11,43 @@ import time
 import subprocess
 from pathlib import Path
 
+from datetime import datetime
+
+class TeeLogger:
+    """Redirects stdout/stderr to both the console and a timestamped log file."""
+    def __init__(self, log_path: Path):
+        self.terminal = sys.stdout
+        self.log_file = open(log_path, "w", encoding="utf-8")
+        
+    def write(self, message):
+        self.terminal.write(message)
+        self.log_file.write(message)
+        self.log_file.flush()
+        
+    def flush(self):
+        self.terminal.flush()
+        self.log_file.flush()
+
+def setup_logging():
+    log_dir = Path("logs")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = log_dir / f"upload_leonardo_{timestamp}.log"
+    latest_link = log_dir / "latest_upload_leonardo.log"
+    
+    sys.stdout = TeeLogger(log_file)
+    sys.stderr = sys.stdout
+    
+    try:
+        if latest_link.is_symlink() or latest_link.exists():
+            latest_link.unlink()
+        latest_link.symlink_to(log_file.name)
+    except Exception:
+        pass
+    print(f"==========================================================")
+    print(f"[*] Upload Logger Started: {log_file}")
+    print(f"==========================================================")
+
 try:
     import serial
 except ImportError:
@@ -89,6 +126,7 @@ def main():
     parser.add_argument("--manual", action="store_true", help="Manual reset mode (press button and hit enter)")
     
     args = parser.parse_args()
+    setup_logging()
     
     sketch_path = args.sketch
     touch_port = args.port
